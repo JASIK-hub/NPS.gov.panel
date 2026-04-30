@@ -26,7 +26,6 @@ const Header = () => {
       <div className="bg-[#051124] text-white">
         <Container className="flex justify-between items-center py-4">
 
-          {/* Логотип */}
           <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
             <div className="w-10 h-10 bg-[#f9bc06] rounded-full flex items-center justify-center text-xl shadow-lg">
               <span className="mb-1">🇰🇿</span>

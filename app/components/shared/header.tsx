@@ -1,15 +1,19 @@
-"use client"; 
+"use client";
 
 import React, { useState } from 'react';
 import { ShieldCheck, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Container } from './container';
+import Image from 'next/image';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const isAuthPage = pathname === '/auth';
 
   return (
-    <header className="w-full flex flex-col z-50">
+    <header className="w-full flex flex-col z-50 justify-between">
 
       <div className="bg-[#051124] border-white/5">
         <Container className="flex justify-between items-center py-2 text-[11px] font-medium text-white/50">
@@ -27,8 +31,16 @@ const Header = () => {
         <Container className="flex justify-between items-center py-4">
 
           <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <div className="w-10 h-10 bg-[#f9bc06] rounded-full flex items-center justify-center text-xl shadow-lg">
-              <span className="mb-1">🇰🇿</span>
+            <div className="relative w-10 h-10">
+              <Image
+                src="/nps.logo.png"
+                alt="Gerb"
+                className="object-cover"
+                fill
+                priority
+                sizes="40px"
+                quality={90}
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-xl leading-none tracking-tight">nps.gov</span>
@@ -39,9 +51,9 @@ const Header = () => {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
-            <button className="px-6 py-2 bg-white text-[#0a1b33] rounded-md font-bold text-sm transition-all shadow-md">
+            <Link href="/" className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${!isAuthPage ? 'bg-white text-[#0a1b33] font-bold shadow-md' : 'text-white hover:bg-white/5'}`}>
               Главная
-            </button>
+            </Link>
             <button className="px-6 py-2 text-white hover:bg-white/5 rounded-md text-sm font-medium transition-all">
               Опросы
             </button>
@@ -55,9 +67,11 @@ const Header = () => {
               <button className="px-3 py-1.5 text-xs font-bold bg-white text-[#0a1b33] rounded-md shadow-sm">RU</button>
               <button className="px-3 py-1.5 text-xs font-bold text-white/50 hover:text-white transition-all">KZ</button>
             </div>
-            <button className="bg-[#f9bc06] hover:bg-[#e5ac05] px-7 py-2.5 rounded-lg text-sm transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(249,188,6,0.2)]">
-              Войти
-            </button>
+            {!isAuthPage && (
+              <Link href="/auth" className="bg-[#f9bc06] hover:bg-[#e5ac05] px-7 py-2.5 rounded-lg text-sm transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(249,188,6,0.2)]">
+                Войти
+              </Link>
+            )}
           </div>
 
           <button
@@ -74,7 +88,7 @@ const Header = () => {
         <div className="lg:hidden bg-[#0a1b33] border-t border-white/10">
           <Container className="py-6 flex flex-col gap-6">
             <nav className="flex flex-col gap-4">
-              <button className="text-left text-lg font-bold text-yellow-500">Главная</button>
+              <Link href="/" className={`text-left text-lg ${!isAuthPage ? 'font-bold text-yellow-500' : 'text-white/80'}`}>Главная</Link>
               <button className="text-left text-lg text-white/80">Опросы</button>
               <button className="text-left text-lg text-white/80">Аналитика</button>
             </nav>
@@ -84,9 +98,11 @@ const Header = () => {
                 <button className="flex-1 py-3 bg-white/10 rounded-lg font-bold text-white">RU</button>
                 <button className="flex-1 py-3 bg-white/5 rounded-lg font-bold text-white/40">KZ</button>
               </div>
-              <button className="w-full bg-[#f9bc06] text-[#0a1b33] font-bold py-4 rounded-xl">
-                Войти в личный кабинет
-              </button>
+              {!isAuthPage && (
+                <Link href="/auth" className="w-full bg-[#f9bc06] text-[#0a1b33] font-bold py-4 rounded-xl">
+                  Войти в личный кабинет
+                </Link>
+              )}
             </div>
           </Container>
         </div>

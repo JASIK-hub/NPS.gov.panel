@@ -47,7 +47,7 @@ function mapSurveyEntity(entity: SurveyEntity): Survey {
 export async function getActiveSurveys(): Promise<Survey[]> {
   try {
     const response = await fetch(`${NPS_API_URL}/survey?isActive=true`, {
-      next: { revalidate: 300 }
+      next: { revalidate: 60 } // Cache for 1 minute instead of 5
     });
 
     if (!response.ok) {
@@ -57,6 +57,7 @@ export async function getActiveSurveys(): Promise<Survey[]> {
     const data: SurveyEntity[] = await response.json();
     return data.map(mapSurveyEntity);
   } catch (error) {
+    console.error('Error fetching active surveys:', error);
     return [];
   }
 }

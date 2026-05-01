@@ -33,21 +33,20 @@ const InstructionsSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {steps.map((step) => (
-            <div key={step.id} className="relative flex flex-col items-center text-center group">
-              <div className="w-16 h-16 bg-slate-800 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-6 transition-transform group-hover:scale-110 duration-300 shadow-lg">
-                {step.id}
-              </div>
-              {step.id < 3 && (
-                <div className="hidden md:block absolute top-8 left-[60%] w-full h-[2px] bg-slate-200 -z-10" />
-              )}
+            <div key={step.id} className="flex items-start gap-4 group">
+          <div className="flex-shrink-0 w-10 h-10 bg-[#001529] text-white rounded-full flex items-center justify-center text-lg font-bold transition-transform group-hover:scale-105 duration-300 shadow-md">
+            {step.id}
+          </div>
 
-              <h3 className="text-xl font-bold mb-3 text-slate-800">
-                {step.title}
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                {step.desc}
-              </p>
-            </div>
+          <div className="flex flex-col text-left">
+            <h3 className="text-lg font-bold text-slate-800 leading-tight mb-1">
+              {step.title}
+            </h3>
+            <p className="text-sm text-slate-500 leading-snug max-w-[250px]">
+              {step.desc}
+            </p>
+          </div>
+        </div>
           ))}
         </div>
       </div>

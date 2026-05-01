@@ -6,14 +6,14 @@ import { getActiveSurveys, getClosedSurveys } from "./lib/api/surveys";
 
 export default async function HomePage() {
   const [activeSurveys, closedSurveys] = await Promise.all([
-    getActiveSurveys(),
-    getClosedSurveys()
+    getActiveSurveys().catch(() => []),
+    getClosedSurveys().catch(() => [])
   ]);
 
   return (
     <>
       <HeroSection />
-      <div className="max-w-7xl mx-auto px-4 py-12 ">
+      <div className="max-w-7xl mx-auto px-4 py-12">
         <ActiveSurveys surveys={activeSurveys} />
         <ActiveSurveys title="Завершённые опросы" status="closed" surveys={closedSurveys} />
         <StatsSection />

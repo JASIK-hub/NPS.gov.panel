@@ -9,12 +9,12 @@ const StatsSection = () => {
   ];
 
   return (
-    <section className="py-12 bg-slate-50 rounded-3xl px-8">
-      <h2 className="text-2xl font-bold text-center mb-10">Общая статистика</h2>
+    <section className="py-1 rounded-3xl px-8">
+      <h2 className="text-2xl text-black font-bold text-center mb-10">Общая статистика</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((item, idx) => (
           <div key={idx} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
+            <div className="w-12 h-12  rounded-xl flex items-center justify-center mb-4">
               {item.icon}
             </div>
             <div className="text-3xl font-black text-slate-900 mb-1">{item.value}</div>

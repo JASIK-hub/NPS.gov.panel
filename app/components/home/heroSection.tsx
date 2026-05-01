@@ -1,5 +1,6 @@
 import { Container } from "../shared/container";
 import Image from 'next/image';
+import Link from 'next/link';
 
 const HeroSection = () => {
   return (
@@ -7,7 +8,14 @@ const HeroSection = () => {
       <Container className="relative z-10">
         
         <div className="inline-flex items-center gap-2 bg-white/30 border border-white/20 px-4 py-2 rounded-full text-sm mb-8">
-          <Image src="/nps.shield.png" alt='shield-security-photo' width={22} height={22}/>
+          <Image
+            src="/nps.shield.png"
+            alt='shield-security-photo'
+            width={22}
+            height={22}
+            priority
+            sizes="22px"
+          />
           Официальный государственный портал
         </div>
 
@@ -21,12 +29,19 @@ const HeroSection = () => {
 
         <div className="flex flex-wrap gap-4">
           <button className="bg-[#f9bc06] hover:bg-[#e5ac05] font-bold px-8 py-4 rounded-lg transition-colors flex items-center gap-2">
-            Принять участие 
+            Принять участие
             <span>→</span>
           </button>
           <button className="bg-white/30 hover:bg-white/20 border border-white/30 px-8 py-4 rounded-lg font-semibold transition-colors">
             Посмотреть результаты
           </button>
+        </div>
+
+        <div className="mt-6">
+          <Link href="/auth" className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm transition-colors">
+            Уже есть аккаунт?
+            <span className="font-semibold underline">Войти</span>
+          </Link>
         </div>
       </Container>
 

@@ -28,20 +28,25 @@ const HeroSection = () => {
         </p>
 
         <div className="flex flex-wrap gap-4">
-          <button className="bg-[#f9bc06] hover:bg-[#e5ac05] font-bold px-8 py-4 rounded-lg transition-colors flex items-center gap-2">
+          <Link href="/register" className="bg-[#f9bc06] hover:bg-[#e5ac05] font-bold px-8 py-4 rounded-lg transition-colors flex items-center gap-2">
             Принять участие
             <span>→</span>
-          </button>
+          </Link>
           <button className="bg-white/30 hover:bg-white/20 border border-white/30 px-8 py-4 rounded-lg font-semibold transition-colors">
             Посмотреть результаты
           </button>
         </div>
 
-        <div className="mt-6">
-          <Link href="/auth" className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm transition-colors">
-            Уже есть аккаунт?
-            <span className="font-semibold underline">Войти</span>
-          </Link>
+        <div className="mt-8 flex items-center gap-6 text-sm">
+          <span className="text-blue-100/60">Уже зарегистрированы?</span>
+          <div className="flex gap-4">
+            <Link href="/auth/login" className="text-white font-semibold hover:text-blue-200 transition-colors underline">
+              Войти
+            </Link>
+            <Link href="/auth/forgot-password" className="text-blue-200 hover:text-white transition-colors underline">
+              Забыли пароль?
+            </Link>
+          </div>
         </div>
       </Container>
 

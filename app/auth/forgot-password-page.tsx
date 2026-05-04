@@ -14,7 +14,6 @@ const ForgotPasswordPage = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    // Перенаправляем вошедших пользователей на главную
     if (isAuthenticated()) {
       router.push('/');
     }

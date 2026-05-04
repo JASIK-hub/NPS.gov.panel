@@ -28,7 +28,6 @@ const RegisterPage = () => {
   const [codeSent, setCodeSent] = useState(false);
 
   useEffect(() => {
-    // Перенаправляем вошедших пользователей на главную
     if (isAuthenticated()) {
       router.push('/');
     }

@@ -313,12 +313,8 @@ export async function verifyCode(credentials: VerifyCodeRequest): Promise<Verify
 
 export async function logout(): Promise<{ success: boolean; message: string }> {
   try {
-    const response = await fetch(`${NPS_API_URL}/auth/logout`, {
+    const response = await fetchWithAuth(`${NPS_API_URL}/auth/logout`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -334,11 +330,116 @@ export async function logout(): Promise<{ success: boolean; message: string }> {
     };
 
   } catch (error) {
+    removeAuthToken();
+    removeRefreshToken();
     return {
       success: false,
       message: 'Ошибка при выходе'
     };
   }
+}
+
+export async function refreshAccessToken(): Promise<{ success: boolean; accessToken?: string; refreshToken?: string }> {
+  try {
+    const refreshToken = getRefreshToken();
+
+    if (!refreshToken) {
+      return { success: false };
+    }
+
+    const response = await fetch(`${NPS_API_URL}/auth/refresh-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+      removeAuthToken();
+      removeRefreshToken();
+      return { success: false };
+    }
+
+    const data = await response.json();
+
+    if (data.accessToken) {
+      storeAuthToken(data.accessToken);
+    }
+
+    if (data.refreshToken) {
+      storeRefreshToken(data.refreshToken);
+    }
+
+    return {
+      success: true,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+    };
+
+  } catch (error) {
+    removeAuthToken();
+    removeRefreshToken();
+    return { success: false };
+  }
+}
+
+export async function fetchWithAuth(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const token = getAuthToken();
+
+  const headers = {
+    ...options.headers,
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+    'Content-Type': 'application/json',
+  };
+
+  let response = await fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include',
+  });
+
+  if (response.status === 401) {
+    const refreshResult = await refreshAccessToken();
+
+    if (refreshResult.success && refreshResult.accessToken) {
+      const newHeaders = {
+        ...options.headers,
+        'Authorization': `Bearer ${refreshResult.accessToken}`,
+        'Content-Type': 'application/json',
+      };
+
+      response = await fetch(url, {
+        ...options,
+        headers: newHeaders,
+        credentials: 'include',
+      });
+    } else {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/login';
+      }
+      throw new Error('Session expired');
+    }
+  }
+
+  return response;
+}
+
+export async function fetchWithAuthJson<T = any>(
+  url: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const response = await fetchWithAuth(url, options);
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 }
 
 export function storeAuthToken(token: string): void {

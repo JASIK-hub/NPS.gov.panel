@@ -19,32 +19,22 @@ const Header = () => {
   const isVerifyCodePage = pathname === '/auth/verify-code';
 
   useEffect(() => {
-    // Проверяем при монтировании и изменении маршрута
-    const authStatus = checkIsAuthenticated();
-    setIsAuthenticated(authStatus);
+    setIsAuthenticated(checkIsAuthenticated());
+  }, [pathname]);
 
-    // Listener для изменений storage (для синхронизации между вкладками)
+  useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'auth_token' || e.key === 'refresh_token' || e.key === null) {
-        const newAuthStatus = checkIsAuthenticated();
-        setIsAuthenticated(newAuthStatus);
+        setIsAuthenticated(checkIsAuthenticated());
       }
     };
 
-    // Проверка при фокусе на вкладку
-    const handleFocus = () => {
-      const newAuthStatus = checkIsAuthenticated();
-      setIsAuthenticated(newAuthStatus);
-    };
-
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('focus', handleFocus);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('focus', handleFocus);
     };
-  }, [pathname]);
+  }, []);
 
   const handleLogout = () => {
     removeAuthToken();
@@ -109,23 +99,16 @@ const Header = () => {
               <button className="px-3 py-1.5 text-xs font-bold text-white/50 hover:text-white transition-all">KZ</button>
             </div>
             {!isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage && !isAuthenticated && (
-              <>
-                <Link href="/auth/login" className="px-5 py-2.5 border border-white/20 text-white hover:bg-white/5 rounded-lg text-sm transition-all">
-                  Войти
-                </Link>
-                <Link href="/register" className="bg-[#f9bc06] hover:bg-[#e5ac05] px-5 py-2.5 rounded-lg text-sm transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(249,188,6,0.2)]">
-                  Регистрация
-                </Link>
-              </>
+              <Link href="/auth/login" className="bg-[#f9bc06] hover:bg-[#e5ac05] text-[#0a1b33] px-5 py-2.5 rounded-lg text-sm transition-all font-bold">
+                Войти
+              </Link>
             )}
             {isAuthenticated && !isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage && (
               <>
-                <Link href="/profile" className="px-5 py-2.5 border border-white/20 text-white hover:bg-white/5 rounded-lg text-sm transition-all flex items-center gap-2">
-                  <User size={16} />
-                  Профиль
+                <Link href="/profile" className="w-10 h-10 bg-[#f9bc06] rounded-full flex items-center justify-center hover:opacity-80 transition-all">
+                  <User size={20} className="text-[#0a1b33]" />
                 </Link>
-                <button onClick={handleLogout} className="px-5 py-2.5 border border-red-500/50 text-red-400 hover:bg-red-500/10 rounded-lg text-sm transition-all flex items-center gap-2">
-                  <LogOut size={16} />
+                <button onClick={handleLogout} className="px-4 py-2 text-white/80 hover:text-white rounded-lg text-sm transition-all">
                   Выйти
                 </button>
               </>
@@ -162,20 +145,20 @@ const Header = () => {
                 <button className="flex-1 py-3 bg-white/5 rounded-lg font-bold text-white/40">KZ</button>
               </div>
               {!isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage && !isAuthenticated && (
-                <>
-                  <Link href="/auth/login" className="w-full border border-white/20 text-white font-bold py-3 rounded-xl">
-                    Войти
-                  </Link>
-                  <Link href="/register" className="w-full bg-[#f9bc06] text-[#0a1b33] font-bold py-4 rounded-xl">
-                    Регистрация
-                  </Link>
-                </>
+                <Link href="/auth/login" className="w-full bg-[#f9bc06] text-[#0a1b33] font-bold py-4 rounded-xl">
+                  Войти
+                </Link>
               )}
               {isAuthenticated && !isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage && (
                 <>
-                  <Link href="/profile" className="w-full border border-white/20 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">
-                    <User size={18} />
-                    Профиль
+                  <Link href="/profile" className="flex items-center gap-3 py-3">
+                    <div className="w-12 h-12 bg-[#f9bc06] rounded-full flex items-center justify-center">
+                      <User size={24} className="text-[#0a1b33]" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-white font-bold">Профиль</span>
+                      <span className="text-white/60 text-sm">Личный кабинет</span>
+                    </div>
                   </Link>
                   <button onClick={handleLogout} className="w-full border border-red-500/50 text-red-400 font-bold py-3 rounded-xl flex items-center justify-center gap-2">
                     <LogOut size={18} />

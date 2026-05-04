@@ -2,7 +2,7 @@ import HeroSection from "./components/home/heroSection";
 import ActiveSurveys from "./components/home/activeSurveys";
 import StatsSection from "./components/home/statsSection";
 import InstructionsSection from "./components/home/instructionsSection";
-import { getActiveSurveys, getClosedSurveys } from "./lib/api/surveys";
+import { getActiveSurveys, getClosedSurveys } from "./lib/api/survey/surveys";
 
 export default async function HomePage() {
   const [activeSurveys, closedSurveys] = await Promise.all([

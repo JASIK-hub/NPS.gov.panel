@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { loginPassword, storeAuthToken, storeRefreshToken, isAuthenticated } from '../lib/api/auth';
 
 const LoginPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -15,9 +16,10 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated()) {
-      router.push('/');
+      const redirect = searchParams.get('redirect');
+      router.push(redirect || '/');
     }
-  }, []);
+  }, [searchParams]);
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +36,9 @@ const LoginPage = () => {
         if (result.refreshToken) {
           storeRefreshToken(result.refreshToken);
         }
+        const redirect = searchParams.get('redirect');
         setTimeout(() => {
-          window.location.href = '/';
+          window.location.href = redirect || '/';
         }, 500);
       } else {
         setError(result.message || 'Неверный email или пароль');

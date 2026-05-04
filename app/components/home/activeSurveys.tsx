@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, Users, Calendar, ArrowRight } from 'lucide-react';
-import { Survey } from '../../lib/api/surveys';
+import { Survey } from '../../lib/api/survey/surveys';
+import Link from 'next/link';
 
 interface SurveyProps {
   title?: string;
@@ -34,11 +35,11 @@ const ActiveSurveys = ({ title = "Активные опросы", status = 'acti
               <div className="p-6 flex flex-col flex-1">
                 <div className="flex justify-between items-center mb-4">
                   <span className={`text-[11px] font-bold px-3 py-1 rounded-full tracking-wide ${
-                    survey.status === 'active'
+                    survey.isActive
                       ? 'bg-green-100 text-brand-success'
                       : 'bg-slate-100 text-slate-500'
                   }`}>
-                    {survey.status === 'active' ? 'АКТИВНЫЙ' : 'ЗАВЕРШЕН'}
+                    {survey.isActive ? 'АКТИВНЫЙ' : 'ЗАВЕРШЕН'}
                   </span>
                   <span className="text-slate-400 text-xs flex items-center gap-1">
                     <MapPin size={13} /> {survey.location}
@@ -66,7 +67,7 @@ const ActiveSurveys = ({ title = "Активные опросы", status = 'acti
                   </span>
                 </div>
 
-                {survey.status === 'active' && (
+                {survey.isActive && (
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                       <span>Участие</span>
@@ -78,13 +79,13 @@ const ActiveSurveys = ({ title = "Активные опросы", status = 'acti
                   </div>
                 )}
 
-                <button className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
-                  survey.status === 'active'
+                <Link href={`/survey/${survey.id}`} className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all text-center block ${
+                  survey.isActive
                     ? 'bg-[#0f172a] text-white hover:bg-blue-900'
                     : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
                 }`}>
-                  {survey.status === 'active' ? 'Проголосовать' : 'Посмотреть результаты'}
-                </button>
+                  {survey.isActive ? 'Проголосовать' : 'Посмотреть результаты'}
+                </Link>
               </div>
 
             </div>

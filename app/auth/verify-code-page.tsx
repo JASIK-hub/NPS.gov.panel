@@ -16,7 +16,6 @@ function VerifyCodeContent() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    // Перенаправляем вошедших пользователей на главную
     if (isAuthenticated()) {
       router.push('/');
     }

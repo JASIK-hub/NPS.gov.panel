@@ -38,7 +38,7 @@ export interface SurveyEntity {
   description: string;
   subTitle:string;
   organization: OrganizationEntity;
-  vote: any[];
+  vote: VoteEntity[];
   options: OptionEntity[];
   type: string;
   region: Region;
@@ -48,19 +48,6 @@ export interface SurveyEntity {
   isActive: boolean;
 }
 
-export interface VoteResult {
-  optionId: number;
-  percentage: number;
-  voteCount: number;
-  isUserVote: boolean;
-}
-
-export interface SurveyResults {
-  surveyId: number;
-  hasVoted: boolean;
-  totalVotes: number;
-  results: VoteResult[];
-}
 
 export interface VoteResponse {
   success: boolean;
@@ -77,6 +64,18 @@ interface OrganizationEntity{
 export interface OptionEntity {
   id: number;
   title: string;
+}
+
+export interface VoteEntity {
+  id: number;
+  user: UserEntity
+  option:OptionEntity
+}
+
+export interface UserEntity {
+  id: number;
+  email: string;
+  name?: string;
 }
 
 const NPS_API_URL = process.env.NEXT_PUBLIC_NPS_API_URL;
@@ -152,7 +151,7 @@ export async function getAllSurveys(): Promise<Survey[]> {
 
 export async function getSurvey(id: string): Promise<SurveyEntity | null> {
   try {
-    const response = await fetchWithAuth(`${NPS_API_URL}/survey/${id}`, {
+    const response = await fetch(`${NPS_API_URL}/survey/${id}`, {
       cache: 'no-store'
     });
 
@@ -193,19 +192,87 @@ export async function voteSurvey(surveyId: string, optionId: number, comment?: s
   }
 }
 
-export async function getSurveyResults(id: string): Promise<SurveyResults | null> {
+export async function checkUserParticipation(surveyId: string): Promise<boolean> {
   try {
-    const response = await fetchWithAuth(`${NPS_API_URL}/survey/${id}/results`, {
+    const response = await fetchWithAuth(`${NPS_API_URL}/survey/${surveyId}/user`, {
       cache: 'no-store'
     });
 
     if (!response.ok) {
-      return null;
+      return false;
     }
 
-    const data: SurveyResults = await response.json();
+    const hasVoted: boolean = await response.json();
+    return hasVoted;
+  } catch (error) {
+    return false;
+  }
+}
+
+export async function getAllSurveyEntities(): Promise<SurveyEntity[]> {
+  try {
+    const response = await fetch(`${NPS_API_URL}/survey`, {
+      next: { revalidate: 300 }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data: SurveyEntity[] = await response.json();
     return data;
   } catch (error) {
-    return null;
+    return [];
+  }
+}
+
+export async function getSurveyTypes(): Promise<string[]> {
+  try {
+    const response = await fetch(`${NPS_API_URL}/survey/type`, {
+      next: { revalidate: 300 }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data: string[] = await response.json();
+    return data;
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function getSurveysByType(type: string): Promise<SurveyEntity[]> {
+  try {
+    const response = await fetch(`${NPS_API_URL}/survey`, {
+      next: { revalidate: 300 }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data: SurveyEntity[] = await response.json();
+    return data.filter(survey => survey.type === type);
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function searchSurveys(query: string): Promise<SurveyEntity[]> {
+  try {
+    const response = await fetch(`${NPS_API_URL}/survey?search=${encodeURIComponent(query)}`, {
+      next: { revalidate: 60 }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data: SurveyEntity[] = await response.json();
+    return data;
+  } catch (error) {
+    return [];
   }
 }

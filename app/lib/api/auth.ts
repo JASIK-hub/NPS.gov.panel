@@ -31,7 +31,7 @@ export interface LoginPasswordResponse {
   accessToken?: string;
   refreshToken?: string;
   user?: {
-    id: string;
+    id: number;
     email: string;
     name?: string;
     role?: string;
@@ -45,7 +45,7 @@ export interface LoginEcpResponse {
   accessToken?: string;
   refreshToken?: string;
   user?: {
-    id: string;
+    id: number;
     email: string;
     name?: string;
     role?: string;
@@ -59,7 +59,7 @@ export interface RegisterResponse {
   message?: string;
   error?: string;
   user?: {
-    id: string;
+    id: number;
     email: string;
     name?: string;
     role?: string;
@@ -77,7 +77,7 @@ export interface VerifyCodeResponse {
   accessToken?: string;
   refreshToken?: string;
   user?: {
-    id: string;
+    id: number;
     email: string;
     name?: string;
     role?: string;
@@ -169,7 +169,6 @@ export async function loginPassword(credentials: LoginPasswordRequest): Promise<
       body: JSON.stringify(credentials),
       credentials: 'include',
     });
-
     const data = await response.json();
 
     if (!response.ok) {
@@ -359,6 +358,9 @@ export async function refreshAccessToken(): Promise<{ success: boolean; accessTo
     if (!response.ok) {
       removeAuthToken();
       removeRefreshToken();
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('user_id');
+      }
       return { success: false };
     }
 
@@ -391,9 +393,26 @@ export async function fetchWithAuth(
 ): Promise<Response> {
   const token = getAuthToken();
 
+  if (!token) {
+    if (typeof window !== 'undefined') {
+      removeAuthToken();
+      removeRefreshToken();
+      localStorage.removeItem('user_id');
+    }
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+    return response;
+  }
+
   const headers = {
     ...options.headers,
-    ...(token && { 'Authorization': `Bearer ${token}` }),
+    'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
 
@@ -420,6 +439,9 @@ export async function fetchWithAuth(
       });
     } else {
       if (typeof window !== 'undefined') {
+        removeAuthToken();
+        removeRefreshToken();
+        localStorage.removeItem('user_id');
         window.location.href = '/auth/login';
       }
       throw new Error('Session expired');
@@ -456,11 +478,14 @@ export function storeRefreshToken(token: string): void {
   }
 }
 
-export function getAuthToken(): string | null {
+export function storeUserId(userId: number): void {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('auth_token');
+    localStorage.setItem('user_id', String(userId));
   }
-  return null;
+}
+
+export function getAuthToken(): string | null {
+  return localStorage.getItem('auth_token');
 }
 
 export function isAuthenticated(): boolean {
@@ -469,22 +494,45 @@ export function isAuthenticated(): boolean {
 }
 
 export function getRefreshToken(): string | null {
-  if (typeof window !== 'undefined') {
     return localStorage.getItem('refresh_token');
+}
+
+export function parseJWT(token: string): any {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    return null;
   }
-  return null;
+}
+
+export function getCurrentUserId(): number | null {
+  const token = getAuthToken();
+  if (!token) {
+    return null;
+  }
+
+  const decoded = parseJWT(token);
+  if (!decoded) {
+    return null;
+  }
+
+  const userId = decoded.userId || decoded.user_id || decoded.sub || decoded.id || decoded.user?.id;
+
+  return userId ? parseInt(String(userId)) : null;
 }
 
 export function removeAuthToken(): void {
-  if (typeof window !== 'undefined') {
+
     localStorage.removeItem('auth_token');
     document.cookie = 'access_token=';
-  }
 }
 
 export function removeRefreshToken(): void {
-  if (typeof window !== 'undefined') {
     localStorage.removeItem('refresh_token');
     document.cookie = 'refresh_token=';
-  }
 }

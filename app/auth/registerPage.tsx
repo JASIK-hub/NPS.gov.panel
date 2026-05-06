@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Shield, Loader, HelpCircle } from 'lucide-react';
-import { loginEcp, storeAuthToken, storeRefreshToken, isAuthenticated } from '../lib/api/auth';
+import { loginEcp, storeAuthToken, storeRefreshToken, storeUserId, isAuthenticated } from '../lib/api/auth';
 import { ncalayerService } from '../lib/ncalayer';
 import NCALayerHelp from '../components/shared/ncaLayerHelp';
 
@@ -64,6 +64,10 @@ const RegisterPage = () => {
 
         if (loginResult.refreshToken) {
           storeRefreshToken(loginResult.refreshToken);
+        }
+
+        if (loginResult.user?.id) {
+          storeUserId(loginResult.user.id);
         }
 
         router.push('/');

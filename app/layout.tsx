@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Header from "./components/shared/header";
 import Footer from "./components/shared/footer";
-
+import './globals.css'
 export const metadata: Metadata = {
   title: "nps.gov — Национальная система опросов",
   description: "Официальный портал для участия в государственных опросах",

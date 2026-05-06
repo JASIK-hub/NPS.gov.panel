@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { loginPassword, storeAuthToken, storeRefreshToken, isAuthenticated } from '../lib/api/auth';
+import { loginPassword, storeAuthToken, storeRefreshToken, storeUserId, isAuthenticated } from '../lib/api/auth';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -35,6 +35,9 @@ const LoginPage = () => {
         }
         if (result.refreshToken) {
           storeRefreshToken(result.refreshToken);
+        }
+        if (result.user?.id) {
+          storeUserId(result.user.id);
         }
         const redirect = searchParams.get('redirect');
         setTimeout(() => {

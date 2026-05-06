@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { loginWithCode, storeAuthToken, storeRefreshToken, isAuthenticated } from '../lib/api/auth';
+import { loginWithCode, storeAuthToken, storeRefreshToken, storeUserId, isAuthenticated } from '../lib/api/auth';
 
 function VerifyCodeContent() {
   const router = useRouter();
@@ -37,6 +37,9 @@ function VerifyCodeContent() {
         }
         if (result.refreshToken) {
           storeRefreshToken(result.refreshToken);
+        }
+        if (result.user?.id) {
+          storeUserId(result.user.id);
         }
         setTimeout(() => {
           window.location.href = '/';

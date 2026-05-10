@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useState } from "react";
 import HeroSection from "./components/home/heroSection";
 import ActiveSurveys from "./components/home/activeSurveys";

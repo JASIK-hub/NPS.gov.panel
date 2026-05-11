@@ -1,34 +1,64 @@
-import { FileText, BarChart3, Layers, Globe, ArrowRight } from 'lucide-react';
+"use client";
 
-const StatsSection = () => {
-  const stats = [
-    { label: "Всего голосов", value: "4,218,650", icon: <FileText className="text-blue-600" /> },
-    { label: "Уровень участия", value: "67.4%", icon: <BarChart3 className="text-blue-600" /> },
-    { label: "Активных опросов", value: "12", icon: <Layers className="text-blue-600" /> },
-    { label: "Регионов участвует", value: "17", icon: <Globe className="text-blue-600" /> },
-  ];
+import { useEffect, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
+import { getCachedSurveyStats } from '@/app/lib/api/survey/surveyCache';
+import { StatsBlocks } from '@/app/components/analytics/statsBlocks';
+import Link from 'next/link';
+
+export default function StatsSection() {
+  const [stats, setStats] = useState({
+    totalVotes: 0,
+    participationRate: 0,
+    activeSurveys: 0,
+    regionsCount: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const data = await getCachedSurveyStats();
+        if (data) {
+          setStats(data);
+        }
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
+
+    const handleStatsUpdate = () => {
+      loadStats();
+    };
+
+    window.addEventListener('stats-updated', handleStatsUpdate);
+
+    return () => {
+      window.removeEventListener('stats-updated', handleStatsUpdate);
+    };
+  }, []);
 
   return (
     <section className="py-1 rounded-3xl px-8">
       <h2 className="text-2xl text-black font-bold text-center mb-10">Общая статистика</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((item, idx) => (
-          <div key={idx} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center">
-            <div className="w-12 h-12  rounded-xl flex items-center justify-center mb-4">
-              {item.icon}
-            </div>
-            <div className="text-3xl font-black text-slate-900 mb-1">{item.value}</div>
-            <div className="text-slate-500 text-sm">{item.label}</div>
-          </div>
-        ))}
+        <StatsBlocks
+          totalVotes={stats.totalVotes}
+          participationRate={stats.participationRate}
+          activeSurveys={stats.activeSurveys}
+          regionsCount={stats.regionsCount}
+          loading={loading}
+        />
       </div>
       <div className="flex justify-center mt-10">
-        <button className="bg-blue-950 text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-900">
+        <Link href="/analytics" className="bg-black text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-900">
           Перейти в аналитику <ArrowRight size={18} />
-        </button>
+        </Link>
       </div>
     </section>
   );
-};
-
-export default StatsSection;
+}

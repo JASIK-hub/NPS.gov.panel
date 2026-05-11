@@ -5,9 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Container } from "@/app/components/shared/container";
 import { SurveyEntity, Survey } from "@/app/lib/api/survey/surveys";
-import { getAllSurveyEntities, getSurveysByType, getSurveyTypes } from "@/app/lib/api/survey/surveys";
 import SurveyCardHome from "@/app/components/survey/surveyCardHome";
 import { filterSurveys } from "@/app/lib/utils/surveySearch";
+import { getCachedSurveyTypes, getCachedAllSurveyEntities, getCachedSurveysByType } from "@/app/lib/api/survey/surveyCache";
 
 function mapSurveyEntity(entity: SurveyEntity): Survey {
   return {
@@ -22,7 +22,8 @@ function mapSurveyEntity(entity: SurveyEntity): Survey {
       year: 'numeric'
     }),
     participants: entity.votedCount,
-    participationPercentage: Math.min(100, Math.round((entity.votedCount / 1000) * 100))
+    participationRate: Math.min(100, Math.round((entity.votedCount / 1000) * 100)),
+    organizationName: entity.organization.name
   };
 }
 
@@ -37,14 +38,14 @@ export default function SurveysPage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const types = await getSurveyTypes();
+        const types = await getCachedSurveyTypes();
         setSurveyTypes(types);
 
         let data: SurveyEntity[];
         if (selectedType === "all") {
-          data = await getAllSurveyEntities();
+          data = await getCachedAllSurveyEntities();
         } else {
-          data = await getSurveysByType(selectedType);
+          data = await getCachedSurveysByType(selectedType);
         }
 
         setSurveys(data);
@@ -62,16 +63,8 @@ export default function SurveysPage() {
   const activeSurveys = filteredSurveys.filter(s => s.isActive).map(mapSurveyEntity);
   const completedSurveys = filteredSurveys.filter(s => !s.isActive).map(mapSurveyEntity);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
-        <div className="animate-pulse">Загрузка...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-slate-100">
       <Container className="py-6">
         <div className="mb-6">
           <Link
@@ -131,7 +124,21 @@ export default function SurveysPage() {
 
         <div className="mb-8">
           <h2 className="text-xl font-bold text-slate-900 mb-4">Активные опросы</h2>
-          {activeSurveys.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-xl border border-slate-200 p-6 animate-pulse">
+                  <div className="h-6 bg-slate-200 rounded mb-3 w-3/4"></div>
+                  <div className="h-4 bg-slate-200 rounded mb-2"></div>
+                  <div className="h-4 bg-slate-200 rounded mb-4 w-1/2"></div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-3 bg-slate-200 rounded w-1/3"></div>
+                    <div className="h-8 bg-slate-200 rounded w-20"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : activeSurveys.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeSurveys.map((survey) => (
                 <SurveyCardHome key={survey.id} survey={survey} />
@@ -147,7 +154,21 @@ export default function SurveysPage() {
 
         <div>
           <h2 className="text-xl font-bold text-slate-900 mb-4">Завершенные опросы</h2>
-          {completedSurveys.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-xl border border-slate-200 p-6 animate-pulse">
+                  <div className="h-6 bg-slate-200 rounded mb-3 w-3/4"></div>
+                  <div className="h-4 bg-slate-200 rounded mb-2"></div>
+                  <div className="h-4 bg-slate-200 rounded mb-4 w-1/2"></div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-3 bg-slate-200 rounded w-1/3"></div>
+                    <div className="h-8 bg-slate-200 rounded w-20"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : completedSurveys.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {completedSurveys.map((survey) => (
                 <SurveyCardHome key={survey.id} survey={survey} />

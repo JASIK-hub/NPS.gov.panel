@@ -82,15 +82,15 @@ const Header = () => {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
-            <Link href="/" className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${(!isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage) ? 'bg-white text-[#0a1b33] font-bold shadow-md' : 'text-white hover:bg-white/5'}`}>
+            <Link href="/" className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${pathname === '/' && !isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage ? 'bg-white text-[#0a1b33] font-bold shadow-md' : 'text-white hover:bg-white/5'}`}>
               Главная
             </Link>
-            <button className="px-6 py-2 text-white hover:bg-white/5 rounded-md text-sm font-medium transition-all">
+            <Link href="/surveys" className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${pathname === '/surveys' ? 'bg-white text-[#0a1b33] font-bold shadow-md' : 'text-white hover:bg-white/5'}`}>
               Опросы
-            </button>
-            <button className="px-6 py-2 text-white hover:bg-white/5 rounded-md text-sm font-medium transition-all">
+            </Link>
+            <Link href="/analytics" className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${pathname === '/analytics' ? 'bg-white text-[#0a1b33] font-bold shadow-md' : 'text-white hover:bg-white/5'}`}>
               Аналитика
-            </button>
+            </Link>
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
@@ -99,7 +99,7 @@ const Header = () => {
               <button className="px-3 py-1.5 text-xs font-bold text-white/50 hover:text-white transition-all">KZ</button>
             </div>
             {!isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage && !isAuthenticated && (
-              <Link href="/auth/login" className="bg-[#f9bc06] hover:bg-[#e5ac05] text-[#0a1b33] px-5 py-2.5 rounded-lg text-sm transition-all font-bold">
+              <Link href={`/auth/login?redirect=${encodeURIComponent(pathname)}`} className="bg-[#f9bc06] hover:bg-[#e5ac05] text-[#0a1b33] px-5 py-2.5 rounded-lg text-sm transition-all font-bold">
                 Войти
               </Link>
             )}
@@ -134,9 +134,9 @@ const Header = () => {
         <div className="lg:hidden bg-[#0a1b33] border-t border-white/10">
           <Container className="py-6 flex flex-col gap-6">
             <nav className="flex flex-col gap-4">
-              <Link href="/" className={`text-left text-lg ${(!isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage) ? 'font-bold text-yellow-500' : 'text-white/80'}`}>Главная</Link>
-              <button className="text-left text-lg text-white/80">Опросы</button>
-              <button className="text-left text-lg text-white/80">Аналитика</button>
+              <Link href="/" className={`text-left text-lg ${pathname === '/' && !isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage ? 'font-bold text-yellow-500' : 'text-white/80'}`}>Главная</Link>
+              <Link href="/surveys" className={`text-left text-lg ${pathname === '/surveys' ? 'font-bold text-yellow-500' : 'text-white/80'}`}>Опросы</Link>
+              <Link href="/analytics" className={`text-left text-lg ${pathname === '/analytics' ? 'font-bold text-yellow-500' : 'text-white/80'}`}>Аналитика</Link>
             </nav>
             <hr className="border-white/10" />
             <div className="flex flex-col gap-4">
@@ -145,7 +145,7 @@ const Header = () => {
                 <button className="flex-1 py-3 bg-white/5 rounded-lg font-bold text-white/40">KZ</button>
               </div>
               {!isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage && !isAuthenticated && (
-                <Link href="/auth/login" className="w-full bg-[#f9bc06] text-[#0a1b33] font-bold py-4 rounded-xl">
+                <Link href={`/auth/login?redirect=${encodeURIComponent(pathname)}`} className="w-full bg-[#f9bc06] text-[#0a1b33] font-bold py-4 rounded-xl">
                   Войти
                 </Link>
               )}

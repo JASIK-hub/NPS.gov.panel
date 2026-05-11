@@ -1,7 +1,7 @@
 import { MapPin, Users, Calendar } from 'lucide-react';
 import { Survey } from '@/app/lib/api/survey/surveys';
 import Link from 'next/link';
-
+import Image from 'next/image';
 interface SurveyCardHomeProps {
   survey: Survey;
 }
@@ -27,7 +27,7 @@ export default function SurveyCardHome({ survey }: SurveyCardHomeProps) {
           {survey.title}
         </h3>
 
-        <p className="text-slate-500 text-sm line-clamp-2 mb-5">
+        <p className="text-slate-500 text-sm line-clamp-2 mb-1">
           {survey.description}
         </p>
       </div>
@@ -35,26 +35,30 @@ export default function SurveyCardHome({ survey }: SurveyCardHomeProps) {
       <div className="border-t border-slate-200" />
 
       <div className="p-6 flex flex-col gap-4">
+        <div className='text-black flex text-sm gap-2'>
+            <span>Инициатор: </span>
+            <span className='text-gray-500'> {survey.organizationName}</span>
+          </div>
         <div className="flex justify-between text-xs text-slate-500">
           <span className="flex items-center gap-1.5">
-            <Calendar size={13} /> {survey.deadline}
+            <Image src="/nps.clock.png" width={13} height={13} alt='clock image'/>До {survey.deadline}
           </span>
           <span className="flex items-center gap-1.5">
-            <Users size={13} /> {survey.participants.toLocaleString()}
+            <Users size={13} /> {survey.participants}
           </span>
         </div>
 
-        {survey.isActive && (
+          
+
           <div className="space-y-1.5">
-            <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
               <span>Участие</span>
-              <span>{survey.participationPercentage}%</span>
+              <span className='text-black'>{survey.participationRate}%</span>
             </div>
             <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-              <div className="bg-blue-900 h-full rounded-full" style={{ width: `${survey.participationPercentage}%` }} />
+              <div className="bg-black h-full rounded-full" style={{ width: `${survey.participationRate}%` }} />
             </div>
           </div>
-        )}
 
         <Link href={`/survey/${survey.id}`} className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all text-center block ${
           survey.isActive

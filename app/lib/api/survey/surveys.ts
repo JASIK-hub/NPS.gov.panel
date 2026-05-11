@@ -8,7 +8,8 @@ export interface Survey {
   location: string;
   deadline: string;
   participants: number;
-  participationPercentage: number;
+  participationRate?: number;
+  organizationName:string
 }
 
 
@@ -46,6 +47,7 @@ export interface SurveyEntity {
   startDate: string;
   validUntil: string;
   isActive: boolean;
+  participationRate?:number
 }
 
 
@@ -92,15 +94,16 @@ function mapSurveyEntity(entity: SurveyEntity): Survey {
       month: 'long',
       year: 'numeric'
     }),
+    organizationName:entity.organization.name,
     participants: entity.votedCount,
-    participationPercentage: Math.min(100, Math.round((entity.votedCount / 1000) * 100))
+    participationRate:entity.participationRate
   };
 }
 
 export async function getActiveSurveys(): Promise<Survey[]> {
   try {
     const response = await fetch(`${NPS_API_URL}/survey?isActive=true`, {
-      next: { revalidate: 60 } 
+      next: { revalidate: 60 }
     });
 
     if (!response.ok) {
@@ -108,7 +111,10 @@ export async function getActiveSurveys(): Promise<Survey[]> {
     }
 
     const data: SurveyEntity[] = await response.json();
-    return data.map(mapSurveyEntity);
+    return data.map(entity => ({
+      ...mapSurveyEntity(entity),
+      participationRate: entity.participationRate
+    }));
   } catch (error) {
     return [];
   }
@@ -125,8 +131,10 @@ export async function getClosedSurveys(): Promise<Survey[]> {
     }
 
     const data: SurveyEntity[] = await response.json();
-
-    return data.map(mapSurveyEntity);
+    return data.map(entity => ({
+      ...mapSurveyEntity(entity),
+      participationRate: entity.participationRate
+    }));
   } catch (error) {
     return [];
   }
@@ -245,7 +253,7 @@ export async function getSurveyTypes(): Promise<string[]> {
 
 export async function getSurveysByType(type: string): Promise<SurveyEntity[]> {
   try {
-    const response = await fetch(`${NPS_API_URL}/survey`, {
+    const response = await fetch(`${NPS_API_URL}/survey?type=${type}`, {
       next: { revalidate: 300 }
     });
 
@@ -254,13 +262,13 @@ export async function getSurveysByType(type: string): Promise<SurveyEntity[]> {
     }
 
     const data: SurveyEntity[] = await response.json();
-    return data.filter(survey => survey.type === type);
+    return data;
   } catch (error) {
     return [];
   }
 }
 
-export async function searchSurveys(query: string): Promise<SurveyEntity[]> {
+export async function searchSurveys(query: string): Promise<Survey[]> {
   try {
     const response = await fetch(`${NPS_API_URL}/survey?search=${encodeURIComponent(query)}`, {
       next: { revalidate: 60 }
@@ -271,6 +279,73 @@ export async function searchSurveys(query: string): Promise<SurveyEntity[]> {
     }
 
     const data: SurveyEntity[] = await response.json();
+    return data.map(mapSurveyEntity);
+  } catch (error) {
+    return [];
+  }
+}
+
+export interface SurveyStats {
+  totalVotes: number;
+  participationRate: number;
+  activeSurveys: number;
+  regionsCount: number;
+}
+
+export async function getSurveyStats(): Promise<SurveyStats | null> {
+  try {
+    const response = await fetch(`${NPS_API_URL}/survey/statistics`, {
+      next: { revalidate: 300 }
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data: SurveyStats = await response.json();
+    return data;
+  } catch (error) {
+    return null;
+  }
+}
+
+export interface RegionStats {
+  id: string;
+  name: string;
+  votes: number;
+  activity: number;
+  path: string;
+}
+
+export async function getRegionClosedSurveyStats(): Promise<RegionStats[]> {
+  try {
+    const response = await fetch(`${NPS_API_URL}/region/statistic/survey`, {
+      next: { revalidate: 300 }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    console.log(data)
+    return data
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function getRegionUserStats(): Promise<RegionStats[]> {
+  try {
+    const response = await fetch(`${NPS_API_URL}/region/statistic/user`, {
+      next: { revalidate: 300 }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
     return data;
   } catch (error) {
     return [];

@@ -13,7 +13,9 @@ import {
   voteSurvey,
   checkUserParticipation,
   getAllSurveyEntities,
+  getSurvey,
 } from "@/app/lib/api/survey/surveys";
+import { invalidateStats } from "@/app/lib/api/survey/surveyCache";
 import SurveyNotes from "../surveyNotes";
 
 interface Props {
@@ -30,6 +32,7 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
   const [isMounted, setIsMounted] = useState(false);
   const [error, setError] = useState("");
   const [otherSurveys, setOtherSurveys] = useState<SurveyEntity[]>([]);
+  const [currentSurvey, setCurrentSurvey] = useState<SurveyEntity>(survey);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -43,7 +46,7 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
       if (authStatus && currentUserId) {
         try {
           const hasParticipated = await checkUserParticipation(
-            String(survey.id),
+            String(currentSurvey.id),
           );
           if (hasParticipated) {
             setHasVoted(true);
@@ -53,14 +56,14 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
     };
 
     initAuth();
-  }, [survey.id]);
+  }, [currentSurvey.id]);
 
   useEffect(() => {
     const loadOtherSurveys = async () => {
       try {
         const allSurveys = await getAllSurveyEntities();
         const other = allSurveys
-          .filter((s) => s.id !== survey.id)
+          .filter((s) => s.id !== currentSurvey.id)
           .sort((a, b) => b.vote.length - a.vote.length)
           .slice(0, 2);
         setOtherSurveys(other);
@@ -69,7 +72,7 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
     };
 
     loadOtherSurveys();
-  }, [survey.id]);
+  }, [currentSurvey.id]);
 
   useEffect(() => {
     if (onVoteChange) {
@@ -92,6 +95,18 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
       );
 
       if (result.success) {
+        // Инвалидируем кэш статистики
+        invalidateStats();
+
+        // Получаем обновленные данные опроса
+        const updatedSurvey = await getSurvey(String(survey.id));
+        if (updatedSurvey) {
+          setCurrentSurvey(updatedSurvey);
+        }
+
+        // Отправляем событие обновления статистики
+        window.dispatchEvent(new Event('stats-updated'));
+
         setHasVoted(true);
         if (onVoteChange) {
           onVoteChange(true);
@@ -148,8 +163,8 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
   if (hasVoted) {
     const currentUserId = getCurrentUserId();
 
-    const optionVotes = survey.options.map((option) => {
-      const votes = survey.vote.filter((vote) => vote.option.id === option.id);
+    const optionVotes = currentSurvey.options.map((option) => {
+      const votes = currentSurvey.vote.filter((vote) => vote.option.id === option.id);
       const userVoted = currentUserId
         ? votes.some((vote) => vote.user.id === currentUserId)
         : false;
@@ -173,7 +188,7 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
       4: "bg-slate-200",
     };
 
-    const totalVotes = survey.vote.length;
+    const totalVotes = currentSurvey.vote.length;
     const maxVotes = Math.max(...optionVotes.map((o) => o.voteCount), 1);
 
     return (
@@ -253,11 +268,11 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
           )}
 
           <h4 className="text-lg font-bold mb-4 text-slate-900">
-            {survey.subTitle}
+            {currentSurvey.subTitle}
           </h4>
 
           <div className="space-y-2 mb-6">
-            {survey.options.map((option) => (
+            {currentSurvey.options.map((option) => (
               <label
                 key={option.id}
                 className={`flex items-center p-3 border-2 rounded-xl cursor-pointer transition-all ${
@@ -272,7 +287,7 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
                   value={option.id}
                   checked={selectedOption === option.id}
                   onChange={(e) => setSelectedOption(Number(e.target.value))}
-                  disabled={!survey.isActive}
+                  disabled={!currentSurvey.isActive}
                   className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                 />
                 <span className="ml-3 text-slate-800 font-medium text-sm">
@@ -298,15 +313,15 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
               className="text-black w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900 focus:border-transparent outline-none transition-all resize-none text-sm"
               placeholder="Поделитесь своими мыслями или предложениями..."
               rows={3}
-              disabled={!survey.isActive}
+              disabled={!currentSurvey.isActive}
             />
           </div>
 
           <button
             type="submit"
-            disabled={!survey.isActive || selectedOption === null || isSubmitting}
+            disabled={!currentSurvey.isActive || selectedOption === null || isSubmitting}
             className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
-              !survey.isActive || selectedOption === null || isSubmitting
+              !currentSurvey.isActive || selectedOption === null || isSubmitting
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                 : "bg-[#0f172a] text-white hover:bg-blue-900"
             }`}

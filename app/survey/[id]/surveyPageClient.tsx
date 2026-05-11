@@ -40,7 +40,7 @@ export default function SurveyPageClient({ params }: { params: Promise<{ id: str
 
     if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="animate-pulse">Загрузка...</div>
       </div>
     );
@@ -48,7 +48,7 @@ export default function SurveyPageClient({ params }: { params: Promise<{ id: str
 
   if (!survey) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="text-slate-600">Опрос не найден</div>
       </div>
     );
@@ -64,7 +64,7 @@ export default function SurveyPageClient({ params }: { params: Promise<{ id: str
   const dateRange = `${formatDate(survey.startDate)}-${formatDate(survey.validUntil)}.${new Date(survey.validUntil).getFullYear()}`;
 
   return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <div className="min-h-screen bg-slate-100">
          <Container className="py-6">
           <Link
             href="/surveys"

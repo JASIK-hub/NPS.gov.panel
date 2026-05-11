@@ -6,7 +6,7 @@ import ActiveSurveys from "./components/home/activeSurveys";
 import StatsSection from "./components/home/statsSection";
 import InstructionsSection from "./components/home/instructionsSection";
 import { Survey } from "./lib/api/survey/surveys";
-import { getActiveSurveys, getClosedSurveys } from "./lib/api/survey/surveys";
+import { getCachedActiveSurveys, getCachedClosedSurveys } from "./lib/api/survey/surveyCache";
 
 export default function HomePage() {
   const [activeSurveys, setActiveSurveys] = useState<Survey[]>([]);
@@ -17,8 +17,8 @@ export default function HomePage() {
     const loadSurveys = async () => {
       try {
         const [active, closed] = await Promise.all([
-          getActiveSurveys(),
-          getClosedSurveys()
+          getCachedActiveSurveys(),
+          getCachedClosedSurveys()
         ]);
         setActiveSurveys(active);
         setClosedSurveys(closed);

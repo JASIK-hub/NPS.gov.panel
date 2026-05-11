@@ -24,8 +24,7 @@ class NCALayerService {
 
   async isAvailable(): Promise<boolean> {
     try {
-      await this.client.connect();
-      this.isConnected = true;
+      await this.connect();
       return true;
     } catch {
       this.isConnected = false;
@@ -33,15 +32,15 @@ class NCALayerService {
     }
   }
 
+  private async connect() {
+    this.client = new NCALayerClient();
+    await this.client.connect();
+    this.isConnected = true;
+  }
+
   async ensureConnected() {
     if (!this.isConnected) {
-      try {
-        await this.client.connect();
-        this.isConnected = true;
-      } catch (error) {
-        this.isConnected = false;
-        throw error;
-      }
+      await this.connect();
     }
   }
 

@@ -20,14 +20,14 @@ const InstructionsSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-[#F8FAFC] mt-5 rounded-2xl">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4 uppercase tracking-wide text-slate-800">
-            Порядок участия
-          </h2>
+          <span className="text-xl font-bold mb-4 uppercase tracking-wide text-slate-800">
+            Как это работает
+          </span>
           <p className="text-slate-500 italic">
-            Простой и прозрачный процесс выражения вашего мнения
+            Простой и прозрачный процесс участия
           </p>
         </div>
 

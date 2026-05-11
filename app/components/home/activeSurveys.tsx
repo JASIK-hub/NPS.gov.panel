@@ -19,7 +19,7 @@ const ActiveSurveys = ({ title = "Активные опросы", status = 'acti
           <h2 className="text-3xl font-bold text-slate-900">{title}</h2>
           <p className="text-slate-500 mt-2">Примите участие и выразите своё мнение</p>
         </div>
-        <Link href="/surveys" className="text-blue-600 font-semibold flex items-center gap-2 hover:underline">
+        <Link href="/surveys" className="text-black  flex items-center gap-2 hover:underline">
           Все опросы <ArrowRight size={18} />
         </Link>
       </div>

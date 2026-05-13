@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Container } from './container';
 import Image from 'next/image';
-import { getAuthToken, removeAuthToken, removeRefreshToken, isAuthenticated as checkIsAuthenticated } from '../../lib/api/auth';
+import { getAuthToken, removeAuthToken, removeRefreshToken, isAuthenticated as checkIsAuthenticated, isAdmin } from '../../lib/api/auth';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const isAuthPage = pathname === '/auth/login';
@@ -20,12 +21,15 @@ const Header = () => {
 
   useEffect(() => {
     setIsAuthenticated(checkIsAuthenticated());
+
+    setUserIsAdmin(isAdmin());
   }, [pathname]);
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'auth_token' || e.key === 'refresh_token' || e.key === null) {
         setIsAuthenticated(checkIsAuthenticated());
+        setUserIsAdmin(isAdmin());
       }
     };
 
@@ -105,7 +109,7 @@ const Header = () => {
             )}
             {isAuthenticated && !isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage && (
               <>
-                <Link href="/profile" className="w-10 h-10 bg-[#f9bc06] rounded-full flex items-center justify-center hover:opacity-80 transition-all">
+                <Link href={userIsAdmin ? "/admin" : "/profile"} className="w-10 h-10 bg-[#f9bc06] rounded-full flex items-center justify-center hover:opacity-80 transition-all">
                   <User size={20} className="text-[#0a1b33]" />
                 </Link>
                 <button onClick={handleLogout} className="px-4 py-2 text-white/80 hover:text-white rounded-lg text-sm transition-all">
@@ -151,13 +155,13 @@ const Header = () => {
               )}
               {isAuthenticated && !isAuthPage && !isRegisterPage && !isForgotPasswordPage && !isVerifyCodePage && (
                 <>
-                  <Link href="/profile" className="flex items-center gap-3 py-3">
+                  <Link href={userIsAdmin ? "/admin" : "/profile"} className="flex items-center gap-3 py-3">
                     <div className="w-12 h-12 bg-[#f9bc06] rounded-full flex items-center justify-center">
                       <User size={24} className="text-[#0a1b33]" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-white font-bold">Профиль</span>
-                      <span className="text-white/60 text-sm">Личный кабинет</span>
+                      <span className="text-white font-bold">{userIsAdmin ? "Админ панель" : "Профиль"}</span>
+                      <span className="text-white/60 text-sm">{userIsAdmin ? "Управление опросами" : "Личный кабинет"}</span>
                     </div>
                   </Link>
                   <button onClick={handleLogout} className="w-full border border-red-500/50 text-red-400 font-bold py-3 rounded-xl flex items-center justify-center gap-2">

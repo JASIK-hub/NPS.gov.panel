@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
 import { ExternalLink, CheckCircle2, Clock, XCircle } from "lucide-react";
+import dynamic from "next/dynamic";
 import {
   getSurveyStats,
   getRegionUserStats,
@@ -14,7 +15,11 @@ import { KazakhstanInteractiveMap } from "@/app/components/analytics/KazakhstanI
 import { AgeGroupChart } from "../components/analytics/userAgeGroupChart";
 import { GenderChart } from "../components/analytics/userGenderGroupChart";
 import { TopicChart } from "../components/analytics/surveyTypeChart";
-import { ParticipationChart } from "../components/analytics/userParticipationChart";
+
+const ParticipationChart = dynamic(
+  () => import("../components/analytics/userParticipationChart").then(mod => ({ default: mod.ParticipationChart })),
+  { ssr: false }
+);
 
 export default function AnalyticsPage() {
   const [stats, setStats] = useState({
@@ -58,42 +63,6 @@ export default function AnalyticsPage() {
     loadRegionStats();
     loadClosedSurveyStats();
   }, []);
-
-  const areaChartOptions: any = {
-    chart: { type: "area", toolbar: { show: false }, zoom: { enabled: false } },
-    colors: ["#64748b"],
-    dataLabels: { enabled: false },
-    stroke: { curve: "smooth", width: 2 },
-    fill: {
-      type: "gradient",
-      gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1 },
-    },
-    xaxis: {
-      categories: [
-        "20 фев",
-        "21 фев",
-        "22 фев",
-        "23 фев",
-        "24 фев",
-        "25 фев",
-        "26 фев",
-      ],
-    },
-  };
-
-  const areaChartSeries = [
-    {
-      name: "Голосов",
-      data: [31000, 44000, 28000, 18000, 22000, 35000, 32000],
-    },
-  ];
-
-  const donutOptions: any = {
-    labels: ["Женщины", "Мужчины"],
-    colors: ["#0f172a", "#eab308"],
-    legend: { position: "bottom" },
-    plotOptions: { pie: { donut: { size: "70%" } } },
-  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -168,9 +137,8 @@ export default function AnalyticsPage() {
           <TopicChart/>
         </div>
 
-        <ParticipationChart/>
+        <ParticipationChart isAdmin={false} />
 
-        {/* Хронология и Изменения */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             <h3 className="text-xl font-bold">Хронология решений</h3>

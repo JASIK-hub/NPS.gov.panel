@@ -95,16 +95,13 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
       );
 
       if (result.success) {
-        // Инвалидируем кэш статистики
         invalidateStats();
 
-        // Получаем обновленные данные опроса
         const updatedSurvey = await getSurvey(String(survey.id));
         if (updatedSurvey) {
           setCurrentSurvey(updatedSurvey);
         }
 
-        // Отправляем событие обновления статистики
         window.dispatchEvent(new Event('stats-updated'));
 
         setHasVoted(true);

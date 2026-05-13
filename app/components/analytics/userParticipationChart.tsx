@@ -1,23 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import Chart from 'react-apexcharts';
+import dynamic from 'next/dynamic';
 import { ApexOptions } from 'apexcharts';
 import { fetchAndMapStats, UserStat } from '@/app/lib/api/analytics/analytics.api';
 
-export const ParticipationChart = () => {
+const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
+
+export interface ParticipationChartProps {
+  isAdmin?: boolean;
+}
+
+export const ParticipationChart = ({ isAdmin = false }: ParticipationChartProps) => {
   const [data, setData] = useState<UserStat[]>([]);
 
   useEffect(() => {
        const fetchData = async () => {
          try {
-           const stats = await fetchAndMapStats('user/survey/participation/statistic','date');
+           const endpoint = isAdmin
+             ? 'admin/survey/participation/statistic'
+             : 'user/survey/participation/statistic';
+           const stats = await fetchAndMapStats(endpoint, 'date');
            setData(stats);
          } catch (error) {
          } finally {
          }
        };
        fetchData();
-     }, []);
-
+     }, [isAdmin]);
   const areaChartOptions: ApexOptions = {
     chart: {
       toolbar: { show: false },

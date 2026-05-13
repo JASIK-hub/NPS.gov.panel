@@ -23,7 +23,6 @@ export default function HomePage() {
         setActiveSurveys(active);
         setClosedSurveys(closed);
       } catch (error) {
-        console.error("Failed to load surveys:", error);
       } finally {
         setLoading(false);
       }

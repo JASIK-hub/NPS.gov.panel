@@ -1,5 +1,14 @@
-import RegisterPage from "../auth/registerPage";
+"use client";
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterRoutePage() {
-  return <RegisterPage />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/auth/register');
+  }, [router]);
+
+  return null;
 }

@@ -1,23 +1,24 @@
 import { fetchWithAuth } from '../auth';
+import { apiCache, createCacheKey, cachedFetch, CacheOptions } from '../cache.util';
 
 export interface Survey {
   id: string;
   title: string;
   description: string;
-  isActive:boolean;
+  isActive: boolean;
   location: string;
   deadline: string;
   participants: number;
   participationRate?: number;
-  organizationName:string
+  organizationName: string
 }
-
 
 export interface SurveyOption {
   id: number;
   text: string;
   voteCount?: number;
 }
+
 export enum RegionCodes {
   AST = 'AST',
   ALM = 'ALM',
@@ -26,8 +27,8 @@ export enum RegionCodes {
   KAR = 'KAR',
 }
 
-interface Region{
-  id:number
+interface Region {
+  id: number
   name: string;
   code: RegionCodes;
 }
@@ -37,7 +38,7 @@ export interface SurveyEntity {
   createdAt: string;
   title: string;
   description: string;
-  subTitle:string;
+  subTitle: string;
   organization: OrganizationEntity;
   vote: VoteEntity[];
   options: OptionEntity[];
@@ -47,9 +48,8 @@ export interface SurveyEntity {
   startDate: string;
   validUntil: string;
   isActive: boolean;
-  participationRate?:number
+  participationRate?: number
 }
-
 
 export interface VoteResponse {
   success: boolean;
@@ -57,7 +57,7 @@ export interface VoteResponse {
   error?: string;
 }
 
-interface OrganizationEntity{
+interface OrganizationEntity {
   id: number;
   createdAt: Date;
   name: string;
@@ -71,7 +71,7 @@ export interface OptionEntity {
 export interface VoteEntity {
   id: number;
   user: UserEntity
-  option:OptionEntity
+  option: OptionEntity
 }
 
 export interface UserEntity {
@@ -94,67 +94,76 @@ function mapSurveyEntity(entity: SurveyEntity): Survey {
       month: 'long',
       year: 'numeric'
     }),
-    organizationName:entity.organization.name,
+    organizationName: entity.organization.name,
     participants: entity.votedCount,
-    participationRate:entity.participationRate
+    participationRate: entity.participationRate
   };
 }
 
-export async function getActiveSurveys(): Promise<Survey[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/survey?isActive=true`, {
-      next: { revalidate: 60 }
-    });
+export async function getActiveSurveys(options?: CacheOptions): Promise<Survey[]> {
+  const cacheKey = createCacheKey(['survey', 'active']);
+  const ttl = 2 * 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<Survey[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey?isActive=true`, {
+        next: { revalidate: 60 }
+      });
 
-    const data: SurveyEntity[] = await response.json();
-    return data.map(entity => ({
-      ...mapSurveyEntity(entity),
-      participationRate: entity.participationRate
-    }));
-  } catch (error) {
-    return [];
-  }
+      if (!response.ok) return [];
+
+      const data: SurveyEntity[] = await response.json();
+      return data.map(entity => ({
+        ...mapSurveyEntity(entity),
+        participationRate: entity.participationRate
+      }));
+    },
+    { ...options, ttl }
+  );
 }
 
-export async function getClosedSurveys(): Promise<Survey[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/survey?isActive=false`, {
-      next: { revalidate: 600 }
-    });
+export async function getClosedSurveys(options?: CacheOptions): Promise<Survey[]> {
+  const cacheKey = createCacheKey(['survey', 'closed']);
+  const ttl = 10 * 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<Survey[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey?isActive=false`, {
+        next: { revalidate: 600 }
+      });
 
-    const data: SurveyEntity[] = await response.json();
-    return data.map(entity => ({
-      ...mapSurveyEntity(entity),
-      participationRate: entity.participationRate
-    }));
-  } catch (error) {
-    return [];
-  }
+      if (!response.ok) return [];
+
+      const data: SurveyEntity[] = await response.json();
+      return data.map(entity => ({
+        ...mapSurveyEntity(entity),
+        participationRate: entity.participationRate
+      }));
+    },
+    { ...options, ttl }
+  );
 }
 
-export async function getAllSurveys(): Promise<Survey[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/survey`, {
-      next: { revalidate: 300 }
-    });
+export async function getAllSurveys(options?: CacheOptions): Promise<Survey[]> {
+  const cacheKey = createCacheKey(['survey', 'all']);
+  const ttl = 5 * 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<Survey[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey`, {
+        next: { revalidate: 300 }
+      });
 
-    const data: SurveyEntity[] = await response.json();
-    return data.map(mapSurveyEntity);
-  } catch (error) {
-    return [];
-  }
+      if (!response.ok) return [];
+
+      const data: SurveyEntity[] = await response.json();
+      return data.map(mapSurveyEntity);
+    },
+    { ...options, ttl }
+  );
 }
 
 export async function getSurvey(id: string): Promise<SurveyEntity | null> {
@@ -163,9 +172,7 @@ export async function getSurvey(id: string): Promise<SurveyEntity | null> {
       cache: 'no-store'
     });
 
-    if (!response.ok) {
-      return null;
-    }
+    if (!response.ok) return null;
     const data: SurveyEntity = await response.json();
     return data
   } catch (error) {
@@ -188,6 +195,9 @@ export async function voteSurvey(surveyId: string, optionId: number, comment?: s
       };
     }
 
+    apiCache.invalidate(`survey:${surveyId}`);
+    apiCache.invalidate('survey');
+
     return {
       success: true,
       message: 'Голос принят'
@@ -206,9 +216,7 @@ export async function checkUserParticipation(surveyId: string): Promise<boolean>
       cache: 'no-store'
     });
 
-    if (!response.ok) {
-      return false;
-    }
+    if (!response.ok) return false;
 
     const hasVoted: boolean = await response.json();
     return hasVoted;
@@ -217,72 +225,84 @@ export async function checkUserParticipation(surveyId: string): Promise<boolean>
   }
 }
 
-export async function getAllSurveyEntities(): Promise<SurveyEntity[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/survey`, {
-      next: { revalidate: 300 }
-    });
+export async function getAllSurveyEntities(options?: CacheOptions): Promise<SurveyEntity[]> {
+  const cacheKey = createCacheKey(['survey', 'all', 'entities']);
+  const ttl = 5 * 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<SurveyEntity[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey`, {
+        next: { revalidate: 300 }
+      });
 
-    const data: SurveyEntity[] = await response.json();
-    return data;
-  } catch (error) {
-    return [];
-  }
+      if (!response.ok) return [];
+
+      const data: SurveyEntity[] = await response.json();
+      return data;
+    },
+    { ...options, ttl }
+  );
 }
 
-export async function getSurveyTypes(): Promise<string[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/survey/type`, {
-      next: { revalidate: 300 }
-    });
+export async function getSurveyTypes(options?: CacheOptions): Promise<string[]> {
+  const cacheKey = createCacheKey(['survey', 'types']);
+  const ttl = 10 * 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<string[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey/type`, {
+        next: { revalidate: 300 }
+      });
 
-    const data: string[] = await response.json();
-    return data;
-  } catch (error) {
-    return [];
-  }
+      if (!response.ok) return [];
+
+      const data: string[] = await response.json();
+      return data;
+    },
+    { ...options, ttl }
+  );
 }
 
-export async function getSurveysByType(type: string): Promise<SurveyEntity[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/survey?type=${type}`, {
-      next: { revalidate: 300 }
-    });
+export async function getSurveysByType(type: string, options?: CacheOptions): Promise<SurveyEntity[]> {
+  const cacheKey = createCacheKey(['survey', 'type', type]);
+  const ttl = 5 * 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<SurveyEntity[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey?type=${type}`, {
+        next: { revalidate: 300 }
+      });
 
-    const data: SurveyEntity[] = await response.json();
-    return data;
-  } catch (error) {
-    return [];
-  }
+      if (!response.ok) return [];
+
+      const data: SurveyEntity[] = await response.json();
+      return data;
+    },
+    { ...options, ttl }
+  );
 }
 
-export async function searchSurveys(query: string): Promise<Survey[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/survey?search=${encodeURIComponent(query)}`, {
-      next: { revalidate: 60 }
-    });
+export async function searchSurveys(query: string, options?: CacheOptions): Promise<Survey[]> {
+  const cacheKey = createCacheKey(['survey', 'search', query]);
+  const ttl = 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<Survey[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey?search=${encodeURIComponent(query)}`, {
+        next: { revalidate: 60 }
+      });
 
-    const data: SurveyEntity[] = await response.json();
-    return data.map(mapSurveyEntity);
-  } catch (error) {
-    return [];
-  }
+      if (!response.ok) return [];
+
+      const data: SurveyEntity[] = await response.json();
+      return data.map(mapSurveyEntity);
+    },
+    { ...options, ttl }
+  );
 }
 
 export interface SurveyStats {
@@ -292,21 +312,24 @@ export interface SurveyStats {
   regionsCount: number;
 }
 
-export async function getSurveyStats(): Promise<SurveyStats | null> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/survey/statistics`, {
-      next: { revalidate: 300 }
-    });
+export async function getSurveyStats(options?: CacheOptions): Promise<SurveyStats | null> {
+  const cacheKey = createCacheKey(['survey', 'stats']);
+  const ttl = 2 * 60 * 1000;
 
-    if (!response.ok) {
-      return null;
-    }
+  return cachedFetch<SurveyStats | null>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey/statistics`, {
+        next: { revalidate: 300 }
+      });
 
-    const data: SurveyStats = await response.json();
-    return data;
-  } catch (error) {
-    return null;
-  }
+      if (!response.ok) return null;
+
+      const data: SurveyStats = await response.json();
+      return data;
+    },
+    { ...options, ttl, staleWhileRevalidate: true }
+  );
 }
 
 export interface RegionStats {
@@ -317,37 +340,46 @@ export interface RegionStats {
   path: string;
 }
 
-export async function getRegionClosedSurveyStats(): Promise<RegionStats[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/region/statistic/survey`, {
-      next: { revalidate: 300 }
-    });
+export async function getRegionClosedSurveyStats(options?: CacheOptions): Promise<RegionStats[]> {
+  const cacheKey = createCacheKey(['region', 'stats', 'survey']);
+  const ttl = 5 * 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<RegionStats[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/region/statistic/survey`, {
+        next: { revalidate: 300 }
+      });
 
-    const data = await response.json();
+      if (!response.ok) return [];
 
-    return data
-  } catch (error) {
-    return [];
-  }
+      const data = await response.json();
+      return data;
+    },
+    { ...options, ttl }
+  );
 }
 
-export async function getRegionUserStats(): Promise<RegionStats[]> {
-  try {
-    const response = await fetch(`${NPS_API_URL}/region/statistic/user`, {
-      next: { revalidate: 300 }
-    });
+export async function getRegionUserStats(options?: CacheOptions): Promise<RegionStats[]> {
+  const cacheKey = createCacheKey(['region', 'stats', 'user']);
+  const ttl = 5 * 60 * 1000;
 
-    if (!response.ok) {
-      return [];
-    }
+  return cachedFetch<RegionStats[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/region/statistic/user`, {
+        next: { revalidate: 300 }
+      });
 
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    return [];
-  }
+      if (!response.ok) return [];
+
+      const data = await response.json();
+      return data;
+    },
+    { ...options, ttl }
+  );
+}
+
+export function clearSurveyCache(pattern?: string): void {
+  apiCache.invalidate(pattern ? `survey:${pattern}` : 'survey');
 }

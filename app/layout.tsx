@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import Header from "./components/shared/header";
-import Footer from "./components/shared/footer";
+import { AuthProvider } from "./components/auth/authProvider";
+import { LayoutWrapper } from "./components/layout/layoutWrapper";
 import './globals.css'
 export const metadata: Metadata = {
   title: "nps.gov — Национальная система опросов",
@@ -16,15 +15,9 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <div className="flex flex-col min-h-screen">
-          <Suspense fallback={<div className="h-24 bg-[#051124]" />}>
-            <Header />
-          </Suspense>
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <AuthProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </AuthProvider>
       </body>
     </html>
   );

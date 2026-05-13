@@ -17,7 +17,8 @@ const RegisterPage = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    phone: '',
+    phone: '+7',
+    birthday: '',
     gender: 'male',
     password: '',
     confirmPassword: '',
@@ -26,6 +27,9 @@ const RegisterPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailCode, setEmailCode] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -70,7 +74,7 @@ const RegisterPage = () => {
           storeUserId(loginResult.user.id);
         }
 
-        router.push('/');
+        router.push('/profile?verifyEmail=true');
       } else {
         setError(loginResult.message || 'Ошибка входа через ЭЦП');
       }
@@ -88,9 +92,25 @@ const RegisterPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
+
+    let processedValue = type === 'checkbox' ? checked : value;
+
+    if (name === 'phone') {
+      // Убираем все кроме цифр
+      let digits = value.replace(/\D/g, '');
+      // Убираем первую 7 если пользователь ввёл её вместе с +
+      if (digits.startsWith('7')) {
+        digits = digits.substring(1);
+      }
+      // Ограничиваем до 10 цифр (без +7)
+      digits = digits.substring(0, 10);
+      // Добавляем +7 в начале
+      processedValue = '+7' + digits;
+    }
+
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: processedValue
     }));
   };
 
@@ -98,11 +118,46 @@ const RegisterPage = () => {
     if (!formData.email) return;
 
     setIsLoading(true);
+    setError('');
+    setEmailMessage('');
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setCodeSent(true);
+      const { requestCode } = await import('../lib/api/auth');
+      const result = await requestCode(formData.email);
+
+      if (result.success) {
+        setCodeSent(true);
+        setEmailMessage(result.message || 'Код отправлен на вашу почту');
+      } else {
+        setError(result.message || 'Не удалось отправить код');
+      }
     } catch (err) {
-      setError('Ошибка отправки кода');
+      setError('Ошибка отправки кода. Попробуйте позже.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyEmailCode = async () => {
+    if (!emailCode || !formData.email) return;
+
+    setIsLoading(true);
+    setError('');
+    setEmailMessage('');
+
+    try {
+      const { verifyCode } = await import('../lib/api/auth');
+      const result = await verifyCode({ email: formData.email, code: emailCode });
+
+      if (result.success) {
+        setEmailVerified(true);
+        setEmailMessage('Email успешно подтверждён!');
+        setTimeout(() => setEmailMessage(''), 3000);
+      } else {
+        setError(result.message || 'Неверный код');
+      }
+    } catch (err) {
+      setError('Ошибка подтверждения. Попробуйте позже.');
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +167,14 @@ const RegisterPage = () => {
     e.preventDefault();
     setError('');
 
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.password) {
+    if (!formData.fullName || !formData.phone || !formData.birthday || !formData.password) {
       setError('Заполните все обязательные поля');
+      return;
+    }
+
+    // Если email введён, проверяем что он подтверждён
+    if (formData.email && !emailVerified) {
+      setError('Подтвердите email для продолжения');
       return;
     }
 
@@ -129,10 +190,23 @@ const RegisterPage = () => {
 
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      router.push('/auth/login');
+      const { register } = await import('../lib/api/auth');
+      const result = await register({
+        firstName: formData.fullName,
+        email: emailVerified ? formData.email : undefined,
+        phone: formData.phone,
+        birthday: formData.birthday,
+        gender: formData.gender,
+        password: formData.password,
+      });
+
+      if (result.success) {
+        router.push('/auth/login?registered=true');
+      } else {
+        setError(result.message || 'Ошибка регистрации');
+      }
     } catch (err) {
-      setError('Ошибка регистрации');
+      setError('Ошибка соединения. Попробуйте позже.');
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +285,7 @@ const RegisterPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Электронная почта
+              Электронная почта {emailVerified && <span className="text-green-600">(подтверждён)</span>}
             </label>
             <div className="flex gap-2">
               <input
@@ -219,19 +293,44 @@ const RegisterPage = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="example@mail.com"
+                placeholder="example@mail.com (необязательно)"
                 className="text-black flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
-                required
+                disabled={emailVerified}
               />
               <button
                 type="button"
                 onClick={handleSendCode}
-                disabled={!formData.email || isLoading || codeSent}
+                disabled={!formData.email || isLoading || emailVerified}
                 className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm"
               >
-                {isLoading ? 'Отправка...' : codeSent ? 'Код отправлен' : 'Отправить код'}
+                {isLoading ? 'Отправка...' : emailVerified ? 'Подтверждён' : 'Отправить код'}
               </button>
             </div>
+
+            {/* Поле для ввода кода подтверждения */}
+            {codeSent && !emailVerified && (
+              <div className="mt-3 flex gap-2">
+                <input
+                  type="text"
+                  value={emailCode}
+                  onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').substring(0, 6))}
+                  placeholder="Введите код из письма"
+                  className="text-black flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={handleVerifyEmailCode}
+                  disabled={!emailCode || isLoading}
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm"
+                >
+                  {isLoading ? 'Проверка...' : 'Подтвердить'}
+                </button>
+              </div>
+            )}
+
+            {emailMessage && (
+              <p className="mt-2 text-sm text-green-600">{emailMessage}</p>
+            )}
           </div>
 
           <div>
@@ -243,7 +342,22 @@ const RegisterPage = () => {
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              placeholder="+7 (___) ___-__-__"
+              placeholder="+7 700 123 45 67"
+              className="text-black w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Дата рождения
+            </label>
+            <input
+              type="date"
+              name="birthday"
+              value={formData.birthday}
+              onChange={handleInputChange}
+              max={new Date().toISOString().split('T')[0]}
               className="text-black w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
               required
             />

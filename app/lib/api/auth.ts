@@ -834,10 +834,18 @@ export async function completeRegistration(data: CompleteRegistrationRequest): P
     const responseData = await response.json();
 
     if (!response.ok) {
+      let errorMessage = responseData.message || responseData.error || 'Не удалось завершить регистрацию. Попробуйте позже.';
+
+      if (response.status === 400) {
+        if (responseData.message?.includes('уже зарегистрирован') || responseData.error?.includes('уже зарегистрирован')) {
+          errorMessage = responseData.message || 'Пользователь с таким email уже зарегистрирован';
+        }
+      }
+
       return {
         success: false,
         error: responseData.error || 'Registration failed',
-        message: responseData.message || responseData.error || 'Не удалось завершить регистрацию. Попробуйте позже.'
+        message: errorMessage
       };
     }
 

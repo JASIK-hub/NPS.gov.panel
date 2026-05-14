@@ -10,7 +10,8 @@ export interface Survey {
   deadline: string;
   participants: number;
   participationRate?: number;
-  organizationName: string
+  organizationName: string;
+  type?: string;
 }
 
 export interface SurveyOption {
@@ -96,7 +97,8 @@ function mapSurveyEntity(entity: SurveyEntity): Survey {
     }),
     organizationName: entity.organization.name,
     participants: entity.votedCount,
-    participationRate: entity.participationRate
+    participationRate: entity.participationRate,
+    type: entity.type
   };
 }
 
@@ -114,6 +116,7 @@ export async function getActiveSurveys(options?: CacheOptions): Promise<Survey[]
       if (!response.ok) return [];
 
       const data: SurveyEntity[] = await response.json();
+      console.log('Active surveys from API:', data.map(d => ({ id: d.id, title: d.title, type: d.type })));
       return data.map(entity => ({
         ...mapSurveyEntity(entity),
         participationRate: entity.participationRate
@@ -239,6 +242,7 @@ export async function getAllSurveyEntities(options?: CacheOptions): Promise<Surv
       if (!response.ok) return [];
 
       const data: SurveyEntity[] = await response.json();
+      console.log(data)
       return data;
     },
     { ...options, ttl }

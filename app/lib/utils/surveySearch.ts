@@ -1,4 +1,4 @@
-import { SurveyEntity } from '../api/survey/surveys';
+import { SurveyEntity, Survey } from '../api/survey/surveys';
 
 export function searchSurvey(survey: SurveyEntity, query: string): boolean {
   if (!query || query.trim() === '') return true;
@@ -41,4 +41,32 @@ export function searchSurvey(survey: SurveyEntity, query: string): boolean {
 
 export function filterSurveys(surveys: SurveyEntity[], query: string): SurveyEntity[] {
   return surveys.filter(survey => searchSurvey(survey, query));
+}
+
+export function searchSurveyLight(survey: Survey, query: string): boolean {
+  if (!query || query.trim() === '') return true;
+
+  const searchQuery = query.toLowerCase().trim();
+
+  if (survey.title.toLowerCase().includes(searchQuery)) return true;
+  if (survey.description.toLowerCase().includes(searchQuery)) return true;
+  if (survey.location.toLowerCase().includes(searchQuery)) return true;
+  if (survey.organizationName.toLowerCase().includes(searchQuery)) return true;
+  if (survey.deadline.includes(searchQuery)) return true;
+
+  return false;
+}
+
+export function filterSurveysByType(surveys: Survey[], type: string): Survey[] {
+  if (type === 'all') return surveys;
+  console.log('Filtering by type:', type, 'Surveys:', surveys.map(s => ({ id: s.id, title: s.title, type: s.type })));
+  const filtered = surveys.filter(survey => survey.type === type);
+  console.log('Filtered result:', filtered.length);
+  return filtered;
+}
+
+export function filterSurveysLight(surveys: Survey[], query: string, type: string = 'all'): Survey[] {
+  let filtered = surveys.filter(survey => searchSurveyLight(survey, query));
+  filtered = filterSurveysByType(filtered, type);
+  return filtered;
 }

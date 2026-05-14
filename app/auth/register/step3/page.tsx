@@ -18,6 +18,7 @@ const RegisterStep3 = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
+  const [isEmailAlreadyRegistered, setIsEmailAlreadyRegistered] = useState(false);
   const [success, setSuccess] = useState(false);
   const [skipVerification, setSkipVerification] = useState(false);
   const hasInitializedRef = useRef(false);
@@ -28,6 +29,7 @@ const RegisterStep3 = () => {
 
     setIsSending(true);
     setError('');
+    setIsEmailAlreadyRegistered(false);
 
     try {
       const result = await requestCode(data.email);
@@ -137,6 +139,7 @@ const RegisterStep3 = () => {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsEmailAlreadyRegistered(false);
 
     if (!emailCode || emailCode.length < 4) {
       setError('Введите код из письма');
@@ -160,7 +163,13 @@ const RegisterStep3 = () => {
       const result = await completeRegistration(finalData);
 
       if (!result.success) {
-        setError(result.message || 'Ошибка регистрации');
+        const errorMessage = result.message || 'Ошибка регистрации';
+        setError(errorMessage);
+
+        if (errorMessage.toLowerCase().includes('уже зарегистрирован') || errorMessage.toLowerCase().includes('already registered')) {
+          setIsEmailAlreadyRegistered(true);
+        }
+
         setIsLoading(false);
         return;
       }
@@ -281,7 +290,16 @@ const RegisterStep3 = () => {
 
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-800 text-sm text-center">
-                  {error}
+                  <p className="mb-2">{error}</p>
+                  {isEmailAlreadyRegistered && (
+                    <button
+                      type="button"
+                      onClick={() => router.push('/auth/login')}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      Перейти на страницу входа
+                    </button>
+                  )}
                 </div>
               )}
 

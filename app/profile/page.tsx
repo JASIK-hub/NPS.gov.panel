@@ -205,30 +205,30 @@ const ProfilePage = () => {
           </div>
         )}
 
-        {/* Email Verification Card - only show if no email or not verified */}
-        {(!user.email || !user.emailVerified) && (
+        {/* Email Verification Card - show to add email or when verifying */}
+        {(!user.email || step === 'verify') && !user.emailVerified && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className={`p-2 rounded-lg ${user.emailVerified ? 'bg-green-100' : 'bg-yellow-100'}`}>
-              <Mail size={20} className={user.emailVerified ? 'text-green-600' : 'text-yellow-600'} />
+            <div className={`p-2 rounded-lg ${user.emailVerified ? 'bg-green-100' : 'bg-blue-100'}`}>
+              <Mail size={20} className={user.emailVerified ? 'text-green-600' : 'text-blue-600'} />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Email для входа</h2>
               <p className="text-sm text-gray-500">
-                {user.emailVerified
+                {user.emailVerified && user.email
                   ? `Подтверждён: ${user.email}`
                   : user.email
-                  ? `Ожидает подтверждения: ${user.email}`
-                  : 'Подтвердите email для быстрого входа'
+                  ? `Email: ${user.email}`
+                  : 'Добавьте email для быстрого входа'
                 }
               </p>
             </div>
-            {user.emailVerified && (
+            {user.emailVerified && user.email && (
               <CheckCircle size={24} className="text-green-500 ml-auto" />
             )}
           </div>
 
-          {!user.email || step === 'verify' ? (
+          {(!user.email || step === 'verify') ? (
             <div className="border-t border-gray-200 pt-6">
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-800 text-sm mb-4">
@@ -359,6 +359,22 @@ const ProfilePage = () => {
             </div>
           ) : null}
         </div>
+        )}
+
+        {/* Verified Email Badge */}
+        {user.email && user.emailVerified && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-100">
+                <Mail size={20} className="text-green-600" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-gray-900">Email для входа</h2>
+                <p className="text-sm text-gray-500">{user.email}</p>
+              </div>
+              <CheckCircle size={24} className="text-green-500" />
+            </div>
+          </div>
         )}
       </div>
     </div>

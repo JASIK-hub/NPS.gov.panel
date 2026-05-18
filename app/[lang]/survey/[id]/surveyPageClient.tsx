@@ -9,6 +9,10 @@ import Image from 'next/image';
 import { SurveyEntity } from "@/app/lib/api/survey/surveys";
 import { getCurrentUserId } from "@/app/lib/api/auth";
 
+const isSurveyExpired = (validUntil: string): boolean => {
+  return new Date(validUntil) < new Date();
+};
+
 export default function SurveyPageClient({ params }: { params: Promise<{ id: string }> }) {
   const [survey, setSurvey] = useState<SurveyEntity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,6 +66,8 @@ export default function SurveyPageClient({ params }: { params: Promise<{ id: str
   };
 
   const dateRange = `${formatDate(survey.startDate)}-${formatDate(survey.validUntil)}.${new Date(survey.validUntil).getFullYear()}`;
+  const isExpired = isSurveyExpired(survey.validUntil);
+  const isActuallyActive = survey.isActive && !isExpired;
 
   return (
       <div className="min-h-screen bg-slate-100">
@@ -75,11 +81,11 @@ export default function SurveyPageClient({ params }: { params: Promise<{ id: str
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-4">
             <div className="flex items-center gap-2 mb-3">
               <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide ${
-                survey.isActive
+                isActuallyActive
                   ? 'bg-green-100 text-brand-success'
                   : 'bg-slate-100 text-brand-success/50'
               }`}>
-                {survey.isActive ? 'АКТИВНЫЙ' : 'ЗАВЕРШЕН'}
+                {isActuallyActive ? 'АКТИВНЫЙ' : 'ЗАВЕРШЕН'}
               </span>
             </div>
 

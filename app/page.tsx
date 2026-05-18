@@ -1,45 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import HeroSection from "./components/home/heroSection";
-import ActiveSurveys from "./components/home/activeSurveys";
-import StatsSection from "./components/home/statsSection";
-import InstructionsSection from "./components/home/instructionsSection";
-import { Survey } from "./lib/api/survey/surveys";
-import { getCachedActiveSurveys, getCachedClosedSurveys } from "./lib/api/survey/surveyCache";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+const LANGUAGE_KEY = 'nps_language';
 
 export default function HomePage() {
-  const [activeSurveys, setActiveSurveys] = useState<Survey[]>([]);
-  const [closedSurveys, setClosedSurveys] = useState<Survey[]>([]);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const loadSurveys = async () => {
-      try {
-        const [active, closed] = await Promise.all([
-          getCachedActiveSurveys(),
-          getCachedClosedSurveys()
-        ]);
-        setActiveSurveys(active);
-        setClosedSurveys(closed);
-      } catch (error) {
-      } finally {
-        setLoading(false);
-      }
-    };
+    const savedLang = localStorage.getItem(LANGUAGE_KEY);
+    const browserLang = navigator.language.startsWith('kz') ? 'kz' : 'ru';
+    const lang = savedLang || browserLang;
 
-    loadSurveys();
-  }, []);
+    router.replace(`/${lang}`);
+  }, [router]);
 
   return (
-    <>
-      <HeroSection />
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <ActiveSurveys surveys={loading ? [] : activeSurveys} />
-        <ActiveSurveys title="Завершённые опросы" status="closed" surveys={loading ? [] : closedSurveys} />
-        <StatsSection />
-        <InstructionsSection />
-      </div>
-    </>
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+      <div className="animate-pulse text-slate-600">Загрузка...</div>
+    </div>
   );
 }

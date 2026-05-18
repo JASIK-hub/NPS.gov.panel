@@ -8,6 +8,7 @@ export interface Survey {
   isActive: boolean;
   location: string;
   deadline: string;
+  validUntil: string;
   participants: number;
   participationRate?: number;
   organizationName: string;
@@ -83,6 +84,10 @@ export interface UserEntity {
 
 const NPS_API_URL = process.env.NEXT_PUBLIC_NPS_API_URL;
 
+export function isSurveyExpired(validUntil: string): boolean {
+  return new Date(validUntil) < new Date();
+}
+
 function mapSurveyEntity(entity: SurveyEntity): Survey {
   return {
     id: String(entity.id),
@@ -95,6 +100,7 @@ function mapSurveyEntity(entity: SurveyEntity): Survey {
       month: 'long',
       year: 'numeric'
     }),
+    validUntil: entity.validUntil,
     organizationName: entity.organization.name,
     participants: entity.votedCount,
     participationRate: entity.participationRate,
@@ -102,14 +108,14 @@ function mapSurveyEntity(entity: SurveyEntity): Survey {
   };
 }
 
-export async function getActiveSurveys(options?: CacheOptions): Promise<Survey[]> {
-  const cacheKey = createCacheKey(['survey', 'active']);
+export async function getActiveSurveys(options?: CacheOptions, lang: string = 'ru'): Promise<Survey[]> {
+  const cacheKey = createCacheKey(['survey', 'active', lang]);
   const ttl = 2 * 60 * 1000;
 
   return cachedFetch<Survey[]>(
     cacheKey,
     async () => {
-      const response = await fetch(`${NPS_API_URL}/survey?isActive=true`, {
+      const response = await fetch(`${NPS_API_URL}/survey?isActive=true&language=${lang}`, {
         next: { revalidate: 60 }
       });
 
@@ -117,30 +123,36 @@ export async function getActiveSurveys(options?: CacheOptions): Promise<Survey[]
 
       const data: SurveyEntity[] = await response.json();
       console.log('Active surveys from API:', data.map(d => ({ id: d.id, title: d.title, type: d.type })));
-      return data.map(entity => ({
-        ...mapSurveyEntity(entity),
-        participationRate: entity.participationRate
-      }));
+      return data
+        .filter(entity => !isSurveyExpired(entity.validUntil))
+        .map(entity => ({
+          ...mapSurveyEntity(entity),
+          participationRate: entity.participationRate
+        }));
     },
     { ...options, ttl }
   );
 }
 
-export async function getClosedSurveys(options?: CacheOptions): Promise<Survey[]> {
-  const cacheKey = createCacheKey(['survey', 'closed']);
+export async function getClosedSurveys(options?: CacheOptions, lang: string = 'ru'): Promise<Survey[]> {
+  const cacheKey = createCacheKey(['survey', 'closed', lang]);
   const ttl = 10 * 60 * 1000;
 
   return cachedFetch<Survey[]>(
     cacheKey,
     async () => {
-      const response = await fetch(`${NPS_API_URL}/survey?isActive=false`, {
-        next: { revalidate: 600 }
-      });
+      const [inactiveResponse, activeResponse] = await Promise.all([
+        fetch(`${NPS_API_URL}/survey?isActive=false&language=${lang}`, { next: { revalidate: 600 } }),
+        fetch(`${NPS_API_URL}/survey?isActive=true&language=${lang}`, { next: { revalidate: 60 } })
+      ]);
 
-      if (!response.ok) return [];
+      const closed: SurveyEntity[] = inactiveResponse.ok ? await inactiveResponse.json() : [];
+      const active: SurveyEntity[] = activeResponse.ok ? await activeResponse.json() : [];
 
-      const data: SurveyEntity[] = await response.json();
-      return data.map(entity => ({
+      const expired = active.filter(entity => isSurveyExpired(entity.validUntil));
+      const allClosed = [...closed, ...expired];
+
+      return allClosed.map(entity => ({
         ...mapSurveyEntity(entity),
         participationRate: entity.participationRate
       }));
@@ -169,9 +181,9 @@ export async function getAllSurveys(options?: CacheOptions): Promise<Survey[]> {
   );
 }
 
-export async function getSurvey(id: string): Promise<SurveyEntity | null> {
+export async function getSurvey(id: string, lang: string = 'ru'): Promise<SurveyEntity | null> {
   try {
-    const response = await fetch(`${NPS_API_URL}/survey/${id}`, {
+    const response = await fetch(`${NPS_API_URL}/survey/${id}?language=${lang}`, {
       cache: 'no-store'
     });
 
@@ -242,27 +254,29 @@ export async function getAllSurveyEntities(options?: CacheOptions): Promise<Surv
       if (!response.ok) return [];
 
       const data: SurveyEntity[] = await response.json();
-      console.log(data)
       return data;
     },
     { ...options, ttl }
   );
 }
 
-export async function getSurveyTypes(options?: CacheOptions): Promise<string[]> {
-  const cacheKey = createCacheKey(['survey', 'types']);
+export async function getSurveyTypes(lang?: string, options?: CacheOptions): Promise<SurveyType[]> {
+  const cacheKey = createCacheKey(['survey', 'types', lang || 'ru']);
   const ttl = 10 * 60 * 1000;
 
-  return cachedFetch<string[]>(
+  return cachedFetch<SurveyType[]>(
     cacheKey,
     async () => {
-      const response = await fetch(`${NPS_API_URL}/survey/type`, {
+      const url = lang
+        ? `${NPS_API_URL}/survey/type?language=${lang}`
+        : `${NPS_API_URL}/survey/type`;
+      const response = await fetch(url, {
         next: { revalidate: 300 }
       });
 
       if (!response.ok) return [];
 
-      const data: string[] = await response.json();
+      const data: SurveyType[] = await response.json();
       return data;
     },
     { ...options, ttl }
@@ -342,6 +356,13 @@ export interface RegionStats {
   votes: number;
   activity: number;
   path: string;
+}
+
+export interface SurveyType {
+  id: number;
+  name: string;
+  nameKz: string;
+  nameRu: string;
 }
 
 export async function getRegionClosedSurveyStats(options?: CacheOptions): Promise<RegionStats[]> {

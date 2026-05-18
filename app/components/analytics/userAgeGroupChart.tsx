@@ -1,7 +1,9 @@
-import {  fetchAndMapStats, UserStat } from '@/app/lib/api/analytics/analytics.api';
+import { fetchAndMapStats, UserStat } from '@/app/lib/api/analytics/analytics.api';
 import React, { useEffect, useState } from 'react';
+import { useTranslations } from '@/app/lib/locales/useTranslations';
 
 export const AgeGroupChart = () => {
+  const { t } = useTranslations();
   const [data, setData] = useState<UserStat[]>([]);
 
   useEffect(() => {
@@ -16,13 +18,13 @@ export const AgeGroupChart = () => {
     fetchData();
   }, []);
 
-  if (!data.length) return <div>Нет данных для отображения</div>;
+  if (!data.length) return <div>{t('analytics.noData')}</div>;
 
   const maxVal = Math.max(...data.map(item => item.count));
 
   return (
     <div className="bg-white p-8 rounded-xl border border-gray-200 w-full max-w-2xl">
-      <h3 className="font-bold mb-6 text-black text-lg">Возрастные группы</h3>
+      <h3 className="font-bold mb-6 text-black text-lg">{t('analytics.ageGroupChart')}</h3>
       
       <div className="relative">
         

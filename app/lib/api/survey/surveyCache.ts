@@ -1,10 +1,17 @@
 import { SurveyEntity, Survey, getAllSurveyEntities, getSurveysByType, getActiveSurveys, getClosedSurveys, getSurveyStats, getSurveyTypes } from './surveys';
 import { apiCache, createCacheKey } from '../cache.util';
 
-
-export async function getCachedSurveyTypes(): Promise<string[]> {
-  return getSurveyTypes();
+export interface SurveyType {
+  id: number;
+  name: string;
+  nameKz: string;
 }
+
+export async function getCachedSurveyTypes(lang?: string): Promise<SurveyType[]> {
+  return getSurveyTypes(lang);
+}
+
+export type { SurveyType } from './surveys';
 
 export async function getCachedAllSurveyEntities(): Promise<SurveyEntity[]> {
   return getAllSurveyEntities();
@@ -14,12 +21,12 @@ export async function getCachedSurveysByType(type: string): Promise<SurveyEntity
   return getSurveysByType(type);
 }
 
-export async function getCachedActiveSurveys(): Promise<Survey[]> {
-  return getActiveSurveys();
+export async function getCachedActiveSurveys(lang?: string): Promise<Survey[]> {
+  return getActiveSurveys(undefined, lang);
 }
 
-export async function getCachedClosedSurveys(): Promise<Survey[]> {
-  return getClosedSurveys();
+export async function getCachedClosedSurveys(lang?: string): Promise<Survey[]> {
+  return getClosedSurveys(undefined, lang);
 }
 
 export async function getCachedSurveyStats(): Promise<SurveyStats | null> {

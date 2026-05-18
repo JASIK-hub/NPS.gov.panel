@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Loader, Mail, Lock, CheckCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -12,7 +13,8 @@ import {
   isAuthenticated,
   getCurrentUserId,
   getAuthToken,
-} from '../lib/api/auth';
+} from '@/app/lib/api/auth';
+import { useTranslations } from '@/app/lib/locales/useTranslations';
 
 interface UserProfile {
   id?: number;
@@ -26,6 +28,9 @@ interface UserProfile {
 
 const ProfilePage = () => {
   const router = useRouter();
+  const params = useParams();
+  const lang = (params.lang as string) || 'ru';
+  const { t } = useTranslations();
   const [verifyEmailParam, setVerifyEmailParam] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,7 +61,7 @@ const ProfilePage = () => {
     loadProfile();
 
     if (verifyEmailParam === 'true') {
-      setMessage('Добро пожаловать! Вы можете подтвердить email для быстрого входа в будущем.');
+      setMessage(t('profile.welcomeMessage'));
       setTimeout(() => {
         setShowWelcome(false);
       }, 5000);
@@ -94,16 +99,16 @@ const ProfilePage = () => {
       const result = await sendVerifyEmail(email);
 
       if (result.success) {
-        setMessage(result.message || 'Код отправлен на вашу почту');
+        setMessage(result.message || t('profile.codeSent'));
         setTimeout(() => {
           setMessage('');
           setStep('verify');
         }, 1500);
       } else {
-        setError(result.message || 'Не удалось отправить код');
+        setError(result.message || t('profile.codeSendFailed'));
       }
     } catch (err) {
-      setError('Ошибка соединения. Попробуйте позже.');
+      setError(t('profile.connectionError'));
     } finally {
       setIsSaving(false);
     }
@@ -115,12 +120,12 @@ const ProfilePage = () => {
     setMessage('');
 
     if (password && password !== confirmPassword) {
-      setError('Пароли не совпадают');
+      setError(t('profile.passwordsNotMatch'));
       return;
     }
 
     if (password && password.length < 6) {
-      setError('Пароль должен содержать минимум 6 символов');
+      setError(t('profile.passwordMinLength'));
       return;
     }
 
@@ -133,7 +138,7 @@ const ProfilePage = () => {
         if (result.accessToken) {
           storeAuthToken(result.accessToken);
         }
-        setMessage('Email успешно подтверждён!');
+        setMessage(t('profile.emailVerified'));
 
         setTimeout(() => {
           loadProfile();
@@ -144,10 +149,10 @@ const ProfilePage = () => {
           setError('');
         }, 2000);
       } else {
-        setError(result.message || 'Не удалось подтвердить email');
+        setError(result.message || t('profile.verifyEmailFailed'));
       }
     } catch (err) {
-      setError('Ошибка соединения. Попробуйте позже.');
+      setError(t('profile.connectionError'));
     } finally {
       setIsSaving(false);
     }
@@ -167,26 +172,26 @@ const ProfilePage = () => {
         <div className="mb-6">
           <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
             <ArrowLeft size={16} />
-            Вернуться на главную
+            {t('profile.backToMain')}
           </Link>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Профиль</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('profile.title')}</h1>
 
         {/* User Info Card */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Личные данные</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('profile.personalData')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Имя</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">{t('profile.firstName')}</label>
               <p className="text-gray-900">{user.firstName || '-'}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Фамилия</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">{t('profile.lastName')}</label>
               <p className="text-gray-900">{user.lastName || '-'}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Телефон</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">{t('profile.phone')}</label>
               <p className="text-gray-900">{user.phone || '-'}</p>
             </div>
           </div>
@@ -198,7 +203,7 @@ const ProfilePage = () => {
             <div className="flex items-center gap-3">
               <Mail size={20} className="text-yellow-600" />
               <div>
-                <p className="text-sm font-medium text-yellow-800">Подтвердите ваш email</p>
+                <p className="text-sm font-medium text-yellow-800">{t('profile.verifyEmail')}</p>
                 <p className="text-xs text-yellow-700 mt-1">Email {user.email} ожидает подтверждения. Проверьте вашу почту.</p>
               </div>
             </div>
@@ -213,13 +218,13 @@ const ProfilePage = () => {
               <Mail size={20} className={user.emailVerified ? 'text-green-600' : 'text-blue-600'} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Email для входа</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('profile.emailForLogin')}</h2>
               <p className="text-sm text-gray-500">
                 {user.emailVerified && user.email
-                  ? `Подтверждён: ${user.email}`
+                  ? `${t('profile.verified')}: ${user.email}`
                   : user.email
-                  ? `Email: ${user.email}`
-                  : 'Добавьте email для быстрого входа'
+                  ? `${t('profile.emailForLogin')}: ${user.email}`
+                  : t('profile.addEmailForLogin')
                 }
               </p>
             </div>
@@ -246,7 +251,7 @@ const ProfilePage = () => {
                 <form onSubmit={handleSendCode} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Email адрес
+                      {t('profile.emailAddress')}
                     </label>
                     <input
                       type="email"
@@ -267,10 +272,10 @@ const ProfilePage = () => {
                     {isSaving ? (
                       <>
                         <Loader size={18} className="animate-spin" />
-                        Отправка...
+                        {t('profile.sending')}
                       </>
                     ) : (
-                      'Отправить код подтверждения'
+                      `${t('profile.sendCode')}`
                     )}
                   </button>
                 </form>
@@ -278,7 +283,7 @@ const ProfilePage = () => {
                 <form onSubmit={handleVerifyEmail} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Код из письма
+                      {t('profile.codeFromLetter')}
                     </label>
                     <input
                       type="text"
@@ -294,32 +299,32 @@ const ProfilePage = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Пароль (необязательно)
+                      {t('profile.passwordOptional')}
                     </label>
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Минимум 6 символов или оставьте пустым"
+                      placeholder="{t('profile.passwordMinLengthPlaceholder')}"
                       disabled={isSaving}
                       minLength={6}
                       className="text-black w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400 text-sm disabled:opacity-50"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Создайте пароль для быстрого входа или оставьте пустым (будет вход только через ЭЦП)
+                      {t('profile.createPasswordHint')}
                     </p>
                   </div>
 
                   {password && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Подтвердите пароль
+                        {t('profile.confirmPassword')}
                       </label>
                       <input
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Повторите пароль"
+                        placeholder="{t('profile.repeatPassword')}"
                         disabled={isSaving}
                         className="text-black w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder:text-gray-400 text-sm disabled:opacity-50"
                       />
@@ -337,7 +342,7 @@ const ProfilePage = () => {
                       disabled={isSaving}
                       className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors text-sm disabled:opacity-50"
                     >
-                      Назад
+                      {t('profile.back')}
                     </button>
                     <button
                       type="submit"
@@ -347,10 +352,10 @@ const ProfilePage = () => {
                       {isSaving ? (
                         <>
                           <Loader size={18} className="animate-spin" />
-                          Проверка...
+                          {t('profile.verifying')}
                         </>
                       ) : (
-                        'Подтвердить email'
+                        `${t('profile.verifyEmailBtn')}`
                       )}
                     </button>
                   </div>
@@ -369,7 +374,7 @@ const ProfilePage = () => {
                 <Mail size={20} className="text-green-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900">Email для входа</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t('profile.emailForLogin')}</h2>
                 <p className="text-sm text-gray-500">{user.email}</p>
               </div>
               <CheckCircle size={24} className="text-green-500" />

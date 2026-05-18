@@ -1,0 +1,176 @@
+{
+  "header": {
+    "officialPortal": "Официальный портал Республики Казахстан",
+    "secureConnection": "Защищённое соединение",
+    "main": "Главная",
+    "surveys": "Опросы",
+    "analytics": "Аналитика",
+    "login": "Войти",
+    "logout": "Выйти",
+    "profile": "Профиль",
+    "admin": "Админ",
+    "adminPanel": "Управление опросами",
+    "profileLink": "Личный кабинет",
+    "toMain": "На главную",
+    "nationalSurveySystem": "Национальная система опросов"
+  },
+  "hero": {
+    "officialPortal": "Официальный государственный портал",
+    "title": "Ваш голос формирует будущее Казахстана",
+    "subtitle": "Национальная цифровая система общественных опросов. Участвуйте в принятии государственных решений.",
+    "viewResults": "Посмотреть результаты"
+  },
+  "footer": {
+    "nationalSurveySystem": "Национальная система опросов",
+    "description": "Официальная платформа Республики Казахстан для сбора общественного мнения граждан.",
+    "securityStandard": "Соответствует стандартам безопасности ИС РК",
+    "navigation": "Навигация",
+    "activeSurveys": "Активные опросы",
+    "contacts": "Контакты",
+    "copyright": "© 2025 nps.gov — Национальная система опросов РК.",
+    "allRightsReserved": "Все права защищены.",
+    "privacyPolicy": "Политика конфиденциальности",
+    "termsOfUse": "Условия использования"
+  },
+  "instructions": {
+    "howItWorks": "Как это работает",
+    "subtitle": "Простой и прозрачный процесс участия",
+    "step1": {
+      "title": "Авторизация",
+      "desc": "Войдите через ЭЦП или систему eGov для верификации личности гражданина."
+    },
+    "step2": {
+      "title": "Участие в опросе",
+      "desc": "Выберите интересующий опрос, ознакомьтесь с описанием и оставьте свой голос."
+    },
+    "step3": {
+      "title": "Влияние",
+      "desc": "Ваш голос учитывается при принятии важных государственных решений."
+    }
+  },
+  "activeSurveys": {
+    "activeTitle": "Активные опросы",
+    "completedTitle": "Завершённые опросы",
+    "subtitle": "Примите участие и выразите своё мнение",
+    "allSurveys": "Все опросы",
+    "noSurveys": "Нет доступных опросов"
+  },
+  "statsSection": {
+    "title": "Общая статистика",
+    "totalVotes": "Всего голосов",
+    "participationRate": "Уровень участия",
+    "activeSurveys": "Активных опросов",
+    "regions": "Регионов участвует",
+    "goToAnalytics": "Перейти в аналитику"
+  },
+  "surveyCard": {
+    "active": "АКТИВНЫЙ",
+    "completed": "ЗАВЕРШЕН",
+    "governmentAgency": "Государственный орган",
+    "votes": "голосов"
+  },
+  "survey": {
+    "voteError": "Ошибка при голосовании",
+    "connectionError": "Ошибка соединения. Попробуйте позже.",
+    "authRequired": "Требуется авторизация",
+    "authRequiredText": "Для участия в опросе необходимо войти в систему",
+    "authorize": "Пройдите авторизацию",
+    "yourChoice": "Ваш выбор",
+    "votes": "голосов",
+    "surveyExpired": "Срок проведения опроса истёк. Голосование закрыто.",
+    "comment": "Комментарий (необязательно)",
+    "commentPlaceholder": "Поделитесь своими мыслями или предложениями...",
+    "submitting": "Отправка...",
+    "submitVote": "Подтвердить голос"
+  },
+  "surveysPage": {
+    "title": "Все опросы",
+    "searchPlaceholder": "Поиск опросов...",
+    "all": "Все",
+    "active": "Активные",
+    "completed": "Завершенные",
+    "noActive": "Активных опросов пока нет",
+    "noActiveDesc": "Проверьте позже или посмотрите завершенные опросы",
+    "noCompleted": "Завершенных опросов пока нет",
+    "noCompletedDesc": "Проверьте позже или посмотрите активные опросы",
+    "toMain": "На главную"
+  },
+  "analytics": {
+    "title": "Аналитика",
+    "subtitle": "Публичная статистика голосований Республики Казахстан",
+    "mapOfKazakhstan": "Карта Казахстана",
+    "activityByRegion": "Активность по регионам",
+    "completedSurveys": "Завершённые опросы",
+    "statisticsByRegion": "Статистика по регионам",
+    "chronologyOfDecisions": "Хронология решений",
+    "implemented": "Реализовано",
+    "inProcess": "В процессе",
+    "adoptedChanges": "Принятые изменения",
+    "actionsTaken": "Какие действия предприняты:",
+    "moreDetails": "Подробнее",
+    "votes": "голосов",
+    "support": "Поддержка:",
+    "topicChart": "По тематике",
+    "genderChart": "Пол участников",
+    "male": "Мужчина",
+    "female": "Женщина",
+    "ageGroupChart": "Возрастные группы",
+    "participationChart": "Динамика участия",
+    "participationChartDesc": "Ежедневная активность голосований за последние 7 дней",
+    "noData": "Нет данных для отображения",
+    "loading": "Загрузка...",
+    "votesCount": "Голосов",
+    "participants": "Участников",
+    "activity": "Активность"
+  },
+  "profile": {
+    "title": "Профиль",
+    "backToMain": "Вернуться на главную",
+    "personalData": "Личные данные",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "phone": "Телефон",
+    "verifyEmail": "Подтвердите ваш email",
+    "verifyEmailText": "ожидает подтверждения. Проверьте вашу почту.",
+    "emailForLogin": "Email для входа",
+    "addEmailForLogin": "Добавьте email для быстрого входа",
+    "verified": "Подтверждён",
+    "emailAddress": "Email адрес",
+    "codeFromLetter": "Код из письма",
+    "password": "Пароль",
+    "passwordOptional": "Пароль (необязательно)",
+    "confirmPassword": "Подтвердите пароль",
+    "sendCode": "Отправить код подтверждения",
+    "sending": "Отправка...",
+    "verifyEmailBtn": "Подтвердить email",
+    "verifying": "Проверка...",
+    "back": "Назад",
+    "welcomeMessage": "Добро пожаловать! Вы можете подтвердить email для быстрого входа в будущем.",
+    "codeSent": "Код отправлен на вашу почту",
+    "codeSendFailed": "Не удалось отправить код",
+    "emailVerified": "Email успешно подтверждён!",
+    "verifyEmailFailed": "Не удалось подтвердить email",
+    "passwordsNotMatch": "Пароли не совпадают",
+    "passwordMinLength": "Пароль должен содержать минимум 6 символов",
+    "passwordMinLengthPlaceholder": "Минимум 6 символов или оставьте пустым",
+    "createPasswordHint": "Создайте пароль для быстрого входа или оставьте пустым (будет вход только через ЭЦП)",
+    "repeatPassword": "Повторите пароль",
+    "connectionError": "Ошибка соединения. Попробуйте позже."
+  },
+  "stats": {
+    "totalVotes": "Всего голосов",
+    "activeSurveys": "Активные опросы",
+    "participationRate": "Уровень участия",
+    "regions": "Регионов"
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "close": "Закрыть"
+  }
+}

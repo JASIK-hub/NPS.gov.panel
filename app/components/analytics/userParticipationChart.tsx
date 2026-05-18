@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ApexOptions } from 'apexcharts';
 import { fetchAndMapStats, UserStat } from '@/app/lib/api/analytics/analytics.api';
+import { useTranslations } from '@/app/lib/locales/useTranslations';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -10,6 +11,7 @@ export interface ParticipationChartProps {
 }
 
 export const ParticipationChart = ({ isAdmin = false }: ParticipationChartProps) => {
+  const { t } = useTranslations();
   const [data, setData] = useState<UserStat[]>([]);
 
   useEffect(() => {
@@ -147,7 +149,7 @@ export const ParticipationChart = ({ isAdmin = false }: ParticipationChartProps)
             white-space: nowrap;
             box-shadow: 0 2px 8px rgba(202,138,4,0.35);
           ">
-            Голосов: ${Number(val).toLocaleString("ru-RU")}
+            ${t('analytics.votesCount')}: ${Number(val).toLocaleString("ru-RU")}
           </div>
         `;
       },
@@ -155,16 +157,16 @@ export const ParticipationChart = ({ isAdmin = false }: ParticipationChartProps)
       style: { fontSize: "12px" },
        x: { show: false },
       y: {
-        title: { formatter: () => "Голосов:" },
+        title: { formatter: () => `${t('analytics.votesCount')}:` },
         formatter: (val: number) => val.toLocaleString("ru-RU"),
       },
       marker: { show: false }
     },
   };
- 
+
   const areaChartSeries = [
     {
-      name: "Голосов",
+      name: t('analytics.votesCount'),
       data: data.map((item) => item.count),
     },
   ];
@@ -172,10 +174,10 @@ export const ParticipationChart = ({ isAdmin = false }: ParticipationChartProps)
   return (
   <div className="bg-white rounded-xl border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)] p-8 h-full">
     <h3 className="m-0 mb-1 font-bold text-[15px] text-slate-900 leading-[1.3]">
-      Динамика участия
+      {t('analytics.participationChart')}
     </h3>
     <p className="m-0 mb-5 text-[12px] text-slate-400 leading-[1.4]">
-      Ежедневная активность голосований за последние 7 дней
+      {t('analytics.participationChartDesc')}
     </p>
     <div className="w-full">
       <Chart

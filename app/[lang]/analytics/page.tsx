@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
 import { ExternalLink, CheckCircle2, Clock, XCircle } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useParams } from "next/navigation";
 import {
   getSurveyStats,
   getRegionUserStats,
@@ -12,16 +13,19 @@ import {
 } from "@/app/lib/api/survey/surveys";
 import { StatsBlocks } from "@/app/components/analytics/statsBlocks";
 import { KazakhstanInteractiveMap } from "@/app/components/analytics/KazakhstanInteractiveMap";
-import { AgeGroupChart } from "../components/analytics/userAgeGroupChart";
-import { GenderChart } from "../components/analytics/userGenderGroupChart";
-import { TopicChart } from "../components/analytics/surveyTypeChart";
+import { AgeGroupChart } from "@/app/components/analytics/userAgeGroupChart";
+import { GenderChart } from "@/app/components/analytics/userGenderGroupChart";
+import { TopicChart } from "@/app/components/analytics/surveyTypeChart";
+import { useTranslations } from "@/app/lib/locales/useTranslations";
 
 const ParticipationChart = dynamic(
-  () => import("../components/analytics/userParticipationChart").then(mod => ({ default: mod.ParticipationChart })),
+  () => import("@/app/components/analytics/userParticipationChart").then(mod => ({ default: mod.ParticipationChart })),
   { ssr: false }
 );
 
 export default function AnalyticsPage() {
+  const params = useParams();
+  const { t } = useTranslations();
   const [stats, setStats] = useState({
     totalVotes: 0,
     participationRate: 0,
@@ -68,9 +72,9 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-white">
       <div className="bg-slate-100">
         <div className="text-black max-w-7xl px-8 mx-auto py-7 flex flex-col">
-          <span className="text-4xl font-bold">Аналитика</span>
+          <span className="text-4xl font-bold">{t('analytics.title')}</span>
           <span className="text-gray-600">
-            Публичная статистика голосований Республики Казахстан
+            {t('analytics.subtitle')}
           </span>
         </div>
       </div>
@@ -93,10 +97,10 @@ export default function AnalyticsPage() {
           <div className="col-span-3 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="mb-6">
               <h3 className="text-xl font-bold text-[#001D3D]">
-                Карта Казахстана
+                {t('analytics.mapOfKazakhstan')}
               </h3>
               <p className="text-sm text-gray-400 font-medium">
-                Активность по регионам
+                {t('analytics.activityByRegion')}
               </p>
             </div>
             <div className="min-h-[400px]">
@@ -107,9 +111,9 @@ export default function AnalyticsPage() {
           <div className="col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-full">
             <div className="mb-6">
               <h3 className="text-xl font-bold text-[#001D3D]">
-                Завершённые опросы
+                {t('analytics.completedSurveys')}
               </h3>
-              <p className="text-sm text-gray-400">Статистика по регионам</p>
+              <p className="text-sm text-gray-400">{t('analytics.statisticsByRegion')}</p>
             </div>
 
             <div className="space-y-6">
@@ -141,15 +145,15 @@ export default function AnalyticsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-xl font-bold">Хронология решений</h3>
+            <h3 className="text-xl font-bold">{t('analytics.chronologyOfDecisions')}</h3>
             {[
               {
-                status: "Реализовано",
+                status: "{t('analytics.implemented')}",
                 color: "text-emerald-600 bg-emerald-50",
                 icon: <CheckCircle2 size={16} />,
               },
               {
-                status: "В процессе",
+                status: "{t('analytics.inProcess')}",
                 color: "text-orange-600 bg-orange-50",
                 icon: <Clock size={16} />,
               },
@@ -175,10 +179,10 @@ export default function AnalyticsPage() {
                 <div className="flex gap-6 pt-2 border-t text-sm">
                   <span className="font-bold">
                     384 920{" "}
-                    <span className="font-normal text-slate-400">голосов</span>
+                    <span className="font-normal text-slate-400">{t('analytics.votes')}</span>
                   </span>
                   <span className="font-bold">
-                    Поддержка: <span className="text-slate-600">78%</span>
+                    {t('analytics.support')} <span className="text-slate-600">78%</span>
                   </span>
                 </div>
               </div>
@@ -186,11 +190,11 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-xl font-bold">Принятые изменения</h3>
+            <h3 className="text-xl font-bold">{t('analytics.adoptedChanges')}</h3>
             <div className="bg-white border rounded-xl p-5 space-y-4">
               <CheckCircle2 className="text-emerald-500" />
               <p className="text-xs text-slate-400 uppercase font-bold">
-                Какие действия предприняты:
+                {t('analytics.actionsTaken')}
               </p>
               <h4 className="font-bold text-lg">
                 Улучшение качества образования
@@ -201,13 +205,13 @@ export default function AnalyticsPage() {
               </p>
               <div className="flex justify-between items-center pt-4">
                 <span className="text-[10px] font-bold px-2 py-1 bg-emerald-50 text-emerald-600 rounded uppercase">
-                  Реализовано
+                  {t('analytics.implemented')}
                 </span>
                 <a
                   href="#"
                   className="text-blue-600 text-sm flex items-center gap-1 font-medium"
                 >
-                  Подробнее <ExternalLink size={14} />
+                  {t('analytics.moreDetails')} <ExternalLink size={14} />
                 </a>
               </div>
             </div>

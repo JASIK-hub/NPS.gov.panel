@@ -1,4 +1,7 @@
+"use client";
+
 import Image from 'next/image';
+import { useTranslations } from '@/app/lib/locales/useTranslations';
 
 interface StatsBlocksProps {
   totalVotes: number;
@@ -9,24 +12,26 @@ interface StatsBlocksProps {
 }
 
 export function StatsBlocks({ totalVotes, participationRate, activeSurveys, regionsCount, loading = false }: StatsBlocksProps) {
+  const { t, lang } = useTranslations();
+
   const statsData = [
     {
-      label: "Всего голосов",
-      value: loading ? "..." : totalVotes.toLocaleString('ru-RU'),
+      label: t('statsSection.totalVotes'),
+      value: loading ? "..." : totalVotes.toLocaleString(lang === 'kz' ? 'kk-KZ' : 'ru-RU'),
       icon: <Image src='/nps.vote.png' width={45} height={45} alt=''/>
     },
     {
-      label: "Уровень участия",
+      label: t('statsSection.participationRate'),
       value: loading ? "..." : `${participationRate.toFixed(1)}%`,
       icon: <Image src='/nps.growth.png' width={45} height={45} alt='growth image'/>
     },
     {
-      label: "Активных опросов",
+      label: t('statsSection.activeSurveys'),
       value: loading ? "..." : activeSurveys.toString(),
       icon: <Image src='/nps.analytics.png' width={45} height={45} alt='growth image'/>
     },
     {
-      label: "Регионов участвует",
+      label: t('statsSection.regions'),
       value: loading ? "..." : regionsCount.toString(),
       icon: <Image src='/nps.locator.png' width={45} height={45} alt='growth image'/>
     },

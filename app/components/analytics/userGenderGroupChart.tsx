@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 import { fetchAndMapStats, UserStat } from '@/app/lib/api/analytics/analytics.api';
-
+import { useTranslations } from '@/app/lib/locales/useTranslations';
 
 export const GenderChart = () => {
+  const { t } = useTranslations();
   const [series, setSeries] = useState<number[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,7 @@ export const GenderChart = () => {
         const data: UserStat[] = await fetchAndMapStats('user/statistic/gender','gender');
         if (data.length > 0) {
           setSeries(data.map(item => item.count));
-          setLabels(data.map(item => item.groupName =='male'? 'Мужчина' : 'Женщина'));
+          setLabels(data.map(item => item.groupName === 'male' ? t('analytics.male') : t('analytics.female')));
         }
       } catch (error) {
       } finally {
@@ -24,7 +25,7 @@ export const GenderChart = () => {
     };
 
     fetchData();
-  }, []);
+  }, [t]);
 
   const donutOptions: ApexOptions = {
     chart: {
@@ -47,11 +48,11 @@ export const GenderChart = () => {
     }
   };
 
-  if (loading) return <div className="p-6 text-center">Загрузка...</div>;
+  if (loading) return <div className="p-6 text-center">{t('analytics.loading')}</div>;
 
   return (
     <div className="bg-white p-8 rounded-xl border border-gray-200">
-      <h3 className="font-bold mb-9 text-black text-lg">Пол участников</h3>
+      <h3 className="font-bold mb-9 text-black text-lg">{t('analytics.genderChart')}</h3>
       <Chart
         options={donutOptions}
         series={series}

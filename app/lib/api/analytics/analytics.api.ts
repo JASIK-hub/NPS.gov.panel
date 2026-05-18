@@ -6,10 +6,33 @@ export interface UserStat{
   count: number
 }
 
-export interface SurveyTypeStat extends UserStat {}
+export interface SurveyTypeStat {
+  type: string;
+  count: number;
+}
 
 const NPS_API_URL = process.env.NEXT_PUBLIC_NPS_API_URL;
 const DEFAULT_TTL = 5 * 60 * 1000;
+
+export async function fetchSurveyTypeStats(lang: string = 'ru', options?: CacheOptions & { ttl?: number }): Promise<SurveyTypeStat[]> {
+  const cacheKey = createCacheKey(['analytics', 'survey/type/statistic', lang]);
+  const ttl = options?.ttl ?? DEFAULT_TTL;
+  return cachedFetch<SurveyTypeStat[]>(
+    cacheKey,
+    async () => {
+      const response = await fetch(`${NPS_API_URL}/survey/type/statistic?language=${lang}`, {
+        headers: { 'Content-Type': 'application/json' },
+        next: { revalidate: Math.floor(ttl / 1000) }
+      });
+
+      if (!response.ok) return [];
+
+      const data: SurveyTypeStat[] = await response.json();
+      return data;
+    },
+    { ...options, ttl, staleWhileRevalidate: true }
+  );
+}
 
 export async function fetchAndMapStats(
   endpoint: string,

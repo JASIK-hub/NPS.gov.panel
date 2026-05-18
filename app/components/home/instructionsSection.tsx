@@ -1,21 +1,26 @@
+"use client";
+
 import React from 'react';
+import { useTranslations } from '@/app/lib/locales/useTranslations';
 
 const InstructionsSection = () => {
+  const { t } = useTranslations();
+
   const steps = [
-    { 
-      id: 1, 
-      title: "Авторизация", 
-      desc: "Войдите через ЭЦП или систему eGov для верификации личности гражданина." 
+    {
+      id: 1,
+      title: t('instructions.step1.title'),
+      desc: t('instructions.step1.desc')
     },
-    { 
-      id: 2, 
-      title: "Участие в опросе", 
-      desc: "Выберите интересующий опрос, ознакомьтесь с описанием и оставьте свой голос." 
+    {
+      id: 2,
+      title: t('instructions.step2.title'),
+      desc: t('instructions.step2.desc')
     },
-    { 
-      id: 3, 
-      title: "Влияние", 
-      desc: "Ваш голос учитывается при принятии важных государственных решений." 
+    {
+      id: 3,
+      title: t('instructions.step3.title'),
+      desc: t('instructions.step3.desc')
     },
   ];
 
@@ -24,10 +29,10 @@ const InstructionsSection = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
           <span className="text-xl font-bold mb-4 uppercase tracking-wide text-slate-800">
-            Как это работает
+            {t('instructions.howItWorks')}
           </span>
           <p className="text-slate-500 italic">
-            Простой и прозрачный процесс участия
+            {t('instructions.subtitle')}
           </p>
         </div>
 

@@ -17,13 +17,19 @@ import {
 } from "@/app/lib/api/survey/surveys";
 import { invalidateStats } from "@/app/lib/api/survey/surveyCache";
 import SurveyNotes from "../surveyNotes";
+import { useTranslations } from "@/app/lib/locales/useTranslations";
 
 interface Props {
   survey: SurveyEntity;
   onVoteChange?: (hasVoted: boolean) => void;
 }
 
+const isSurveyExpired = (validUntil: string): boolean => {
+  return new Date(validUntil) < new Date();
+};
+
 export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
+  const { t } = useTranslations();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,6 +40,9 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
   const [otherSurveys, setOtherSurveys] = useState<SurveyEntity[]>([]);
   const [currentSurvey, setCurrentSurvey] = useState<SurveyEntity>(survey);
   const pathname = usePathname();
+
+  const isExpired = isSurveyExpired(currentSurvey.validUntil);
+  const isActuallyActive = currentSurvey.isActive && !isExpired;
 
   useEffect(() => {
     const initAuth = async () => {
@@ -109,10 +118,10 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
           onVoteChange(true);
         }
       } else {
-        setError(result.error || "Ошибка при голосовании");
+        setError(result.error || "t('survey.voteError')");
       }
     } catch (error) {
-      setError("Ошибка соединения. Попробуйте позже.");
+      setError("t('survey.connectionError')");
     } finally {
       setIsSubmitting(false);
     }
@@ -143,16 +152,16 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
           </div>
         </div>
         <h4 className="text-lg font-bold text-slate-900 mb-2">
-          Требуется авторизация
+          {t('survey.authRequired')}
         </h4>
         <p className="text-slate-600 text-sm mb-6">
-          Для участия в опросе необходимо войти в систему
+          {t('survey.authRequiredText')}
         </p>
         <Link
           href={`/auth/login?redirect=${encodeURIComponent(pathname)}`}
           className="inline-block w-full py-3 rounded-xl font-bold text-base bg-[#f9bc06] text-[#0a1b33] hover:bg-[#e5ac05] transition-all"
         >
-          Пройдите авторизацию
+          {t('survey.authorize')}
         </Link>
       </div>
     );
@@ -222,14 +231,14 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
                             alt="checkbox image"
                           />
                           <span className="text-[10px] font-bold px-1.5 text-[#1E1B4B] whitespace-nowrap">
-                            Ваш выбор
+                            {t('survey.yourChoice')}
                           </span>
                         </div>
                       )}
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="text-xs text-slate-400">
-                        {voteCount.toLocaleString("ru-RU")} голосов
+                        {voteCount.toLocaleString("ru-RU")} {t('survey.votes')}
                       </span>
                       <span className="text-sm font-bold text-slate-900 min-w-[32px] text-right">
                         {percentage}%
@@ -258,6 +267,12 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
         <form onSubmit={handleSubmit}>
+          {isExpired && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm flex items-center gap-2">
+              <Image src="/nps.clock.png" width={16} height={16} alt="clock icon" />
+              {t('survey.surveyExpired')}
+            </div>
+          )}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}
@@ -284,7 +299,7 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
                   value={option.id}
                   checked={selectedOption === option.id}
                   onChange={(e) => setSelectedOption(Number(e.target.value))}
-                  disabled={!currentSurvey.isActive}
+                  disabled={!isActuallyActive}
                   className="w-4 h-4 text-blue-900 focus:ring-blue-900"
                 />
                 <span className="ml-3 text-slate-800 font-medium text-sm">
@@ -302,28 +317,28 @@ export default function SurveyVotingForm({ survey, onVoteChange }: Props) {
                 height={15}
                 alt="comment image"
               />{" "}
-              Комментарий (необязательно)
+              {t('survey.comment')}
             </label>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               className="text-black w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-900 focus:border-transparent outline-none transition-all resize-none text-sm"
-              placeholder="Поделитесь своими мыслями или предложениями..."
+              placeholder="t('survey.commentPlaceholder')"
               rows={3}
-              disabled={!currentSurvey.isActive}
+              disabled={!isActuallyActive}
             />
           </div>
 
           <button
             type="submit"
-            disabled={!currentSurvey.isActive || selectedOption === null || isSubmitting}
+            disabled={!isActuallyActive || selectedOption === null || isSubmitting}
             className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
-              !currentSurvey.isActive || selectedOption === null || isSubmitting
+              !isActuallyActive || selectedOption === null || isSubmitting
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                 : "bg-[#0f172a] text-white hover:bg-blue-900"
             }`}
           >
-            {isSubmitting ? "Отправка..." : "Подтвердить голос"}
+            {isSubmitting ? "{t('survey.submitting')}" : "t('survey.submitVote')"}
           </button>
         </form>
       </div>

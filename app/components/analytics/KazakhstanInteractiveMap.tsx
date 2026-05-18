@@ -9,6 +9,7 @@ import {
   findRegionByName,
   findParentRegion,
 } from '@/app/lib/utils/regionMapper';
+import { useTranslations } from '@/app/lib/locales/useTranslations';
 
 interface GeoJsonProperties {
   id?: string;
@@ -52,6 +53,7 @@ const getActivityColor = (activity?: number): { fill: string; fillOpacity: numbe
 };
 
 export const KazakhstanInteractiveMap: React.FC<KazakhstanMapProps> = ({ stats = [] }) => {
+  const { t } = useTranslations();
   const [hoveredRegion, setHoveredRegion] = useState<RegionWithStats | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
 
@@ -166,16 +168,16 @@ export const KazakhstanInteractiveMap: React.FC<KazakhstanMapProps> = ({ stats =
           {hoveredRegion.stats ? (
             <div className="space-y-1">
               <div className="text-xs text-gray-500 flex justify-between">
-                <span>Участников:</span>
+                <span>{t('analytics.participants')}:</span>
                 <span className="ml-2 font-medium">{hoveredRegion.stats.votes.toLocaleString()}</span>
               </div>
               <div className="text-xs text-gray-500 flex justify-between">
-                <span>Активность:</span>
+                <span>{t('analytics.activity')}:</span>
                 <span className="ml-2 font-medium">{hoveredRegion.stats.activity}%</span>
               </div>
             </div>
           ) : (
-            <div className="text-xs text-gray-400">Нет данных</div>
+            <div className="text-xs text-gray-400">{t('analytics.noData')}</div>
           )}
         </div>
       )}

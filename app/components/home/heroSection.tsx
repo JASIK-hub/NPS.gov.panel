@@ -3,8 +3,10 @@
 import { Container } from "../shared/container";
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from '../../lib/locales/useTranslations';
 
 const HeroSection = () => {
+  const { t } = useTranslations();
   return (
     <section className="relative bg-[#1a365d] text-white pt-20 pb-40 overflow-hidden">
       <Container className="relative z-10">
@@ -18,20 +20,19 @@ const HeroSection = () => {
             priority
             sizes="22px"
           />
-          Официальный государственный портал
+          {t('hero.officialPortal')}
         </div>
 
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
-          Ваш голос формирует будущее Казахстана
+          {t('hero.title')}
         </h1>
         <p className="text-lg md:text-xl text-blue-100/80 mb-10 max-w-2xl">
-          Национальная цифровая система общественных опросов.
-          Участвуйте в принятии государственных решений.
+          {t('hero.subtitle')}
         </p>
 
         <div className="flex flex-wrap gap-4">
           <button className="bg-white/30 hover:bg-white/20 border border-white/30 px-8 py-4 rounded-lg font-semibold transition-colors">
-            Посмотреть результаты
+            {t('hero.viewResults')}
           </button>
         </div>
 

@@ -35,7 +35,6 @@ export default function SurveysPage() {
           getCachedActiveSurveys(lang),
           getCachedClosedSurveys(lang)
         ]);
-        console.log(types)
         setSurveyTypes(types);
         setActiveSurveys(active);
         setClosedSurveys(closed);
@@ -142,7 +141,7 @@ export default function SurveysPage() {
                       : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
                   }`}
                 >
-                  {lang === 'kz' ? type.nameKz : type.name}
+                  {lang === 'kz' ? type.nameKz : type.nameRu}
                 </button>
               ))}
             </div>

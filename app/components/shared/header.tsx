@@ -27,7 +27,6 @@ const Header = () => {
     const pathLang = pathname.split('/')[1] as 'ru' | 'kz';
     if (pathLang === 'ru' || pathLang === 'kz') {
       setCurrentLang(pathLang);
-      localStorage.setItem(LANGUAGE_KEY, pathLang);
     } else {
       const savedLang = localStorage.getItem(LANGUAGE_KEY) as 'ru' | 'kz' | null;
       setCurrentLang(savedLang || 'ru');
@@ -58,6 +57,7 @@ const Header = () => {
 
   const handleLanguageChange = (lang: 'ru' | 'kz') => {
     localStorage.setItem(LANGUAGE_KEY, lang);
+    document.cookie = `${LANGUAGE_KEY}=${lang}; path=/; max-age=31536000`;
     setCurrentLang(lang);
 
     const segments = pathname.split('/').filter(Boolean);

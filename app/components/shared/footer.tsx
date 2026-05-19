@@ -2,20 +2,26 @@
 
 import Image from 'next/image';
 import { Phone, Mail, Globe, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from '../../lib/locales/useTranslations';
 
 const Footer = () => {
-  const { t } = useTranslations();
+  const { t, lang } = useTranslations();
+
+  const getLocalizedPath = (path: string) => {
+    return `/${lang}${path}`;
+  };
+
   return (
     <footer className="bg-[#001529] text-white pt-12 pb-8 px-6 mt-20">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 border-b border-white/10 pb-12">
-        
+
         <div className="md:col-span-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
               <Image
-                src="/nps.logo.png" 
-                alt="Gerb" 
+                src="/nps.logo.png"
+                alt="Gerb"
                 className="w-full h-full object-cover"
                 width={22} height={22}
               />
@@ -37,9 +43,9 @@ const Footer = () => {
         <div className="md:col-span-2">
           <h4 className="font-bold mb-6 text-white">{t('footer.navigation')}</h4>
           <ul className="space-y-4 text-sm text-slate-400">
-            <li><a href="#" className="hover:text-white transition-colors">{t('header.main')}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t('footer.activeSurveys')}</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">{t('header.analytics')}</a></li>
+            <li><Link href={`/${lang}`} className="hover:text-white transition-colors">{t('header.main')}</Link></li>
+            <li><Link href={getLocalizedPath('/surveys')} className="hover:text-white transition-colors">{t('footer.activeSurveys')}</Link></li>
+            <li><Link href={getLocalizedPath('/analytics')} className="hover:text-white transition-colors">{t('header.analytics')}</Link></li>
           </ul>
         </div>
 

@@ -5,6 +5,7 @@ export interface SurveyType {
   id: number;
   name: string;
   nameKz: string;
+  nameRu:string
 }
 
 export async function getCachedSurveyTypes(lang?: string): Promise<SurveyType[]> {

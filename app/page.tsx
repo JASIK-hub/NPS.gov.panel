@@ -13,6 +13,9 @@ export default function HomePage() {
     const browserLang = navigator.language.startsWith('kz') ? 'kz' : 'ru';
     const lang = savedLang || browserLang;
 
+    localStorage.setItem(LANGUAGE_KEY, lang);
+    document.cookie = `${LANGUAGE_KEY}=${lang}; path=/; max-age=31536000`;
+
     router.replace(`/${lang}`);
   }, [router]);
 

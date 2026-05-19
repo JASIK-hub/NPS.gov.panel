@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useTranslations } from '@/app/lib/locales/useTranslations';
 
 export default function StatsSection() {
-  const { t } = useTranslations();
+  const { t, lang } = useTranslations();
   const [stats, setStats] = useState({
     totalVotes: 0,
     participationRate: 0,
@@ -57,7 +57,7 @@ export default function StatsSection() {
         />
       </div>
       <div className="flex justify-center mt-10">
-        <Link href="/analytics" className="bg-black text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-900">
+        <Link href={`/${lang}/analytics`} className="bg-black text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-900">
           {t('statsSection.goToAnalytics')} <ArrowRight size={18} />
         </Link>
       </div>

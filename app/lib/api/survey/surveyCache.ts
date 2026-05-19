@@ -11,7 +11,6 @@ export async function getCachedSurveyTypes(lang?: string): Promise<SurveyType[]>
   return getSurveyTypes(lang);
 }
 
-export type { SurveyType } from './surveys';
 
 export async function getCachedAllSurveyEntities(): Promise<SurveyEntity[]> {
   return getAllSurveyEntities();

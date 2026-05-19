@@ -142,7 +142,7 @@ export default function SurveysPage() {
                       : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
                   }`}
                 >
-                  {lang === 'kz' ? type.nameKz : type.nameRu}
+                  {lang === 'kz' ? type.nameKz : type.name}
                 </button>
               ))}
             </div>
